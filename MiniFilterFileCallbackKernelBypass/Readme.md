@@ -90,7 +90,7 @@ fffff800`350c90e6 4c8b157310fdff  mov     r10,qword ptr [FLTMGR!_imp_KeEnterCrit
 fffff800`350c90ed e8fe23326e      call    nt!KeEnterCriticalRegion (fffff800`a33eb4f0)
 fffff800`350c90f2 41b001          mov     r8b,1
 fffff800`350c90f5 488d942480000000 lea     rdx,[rsp+80h]
-<span style="color: green;">fffff800`350c90fd 488d0d9476fcff  lea     rcx,[FLTMGR!FltGlobals+0x58 (fffff800`35090798)]</span>
+<mark>fffff800`350c90fd 488d0d9476fcff  lea     rcx,[FLTMGR!FltGlobals+0x58 (fffff800`35090798)]</mark>
 fffff800`350c9104 4c8b154d10fdff  mov     r10,qword ptr [FLTMGR!_imp_ExAcquireFastResourceShared (fffff800`3509a158)]
 fffff800`350c910b e820da146e      call    nt!ExAcquireFastResourceShared (fffff800`a3216b30)
 </pre>
