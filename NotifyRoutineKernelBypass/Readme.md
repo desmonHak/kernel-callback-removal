@@ -28,7 +28,7 @@ This is an advanced topic requiring the following prerequisites:
 
 - Familiarity with IDA
 
-- Windows kernel exploitation knowledge, including R/W primitives
+- Windows kernel exploitation knowledge
 
 ## Tools Used
 
