@@ -1,6 +1,10 @@
 # EDR bypass through minifilters callbacks delinking
 
-MCP-PoC is a project developed 3 years ago for patching Callbacks related to File I/O operations by https://github.com/alfarom256/ that doesn't work anymore, so i decided to dig up and do some research to fix it.
+MCP-PoC is a project that was developed 3 years ago for patching Callbacks related to File I/O operations by https://github.com/alfarom256/ that doesn't work anymore, so i decided to dig up and do some research to fix it.
+
+## Warning
+
+Even though you can download the binaries from the `releases`, you have to make sure that the offsets and the binary search opcodes done is the same on your windows version or you will get a **BLUE SCREEN OF DEATH**
 
 ## Major Updates
 
