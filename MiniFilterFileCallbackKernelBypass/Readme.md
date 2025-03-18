@@ -37,7 +37,7 @@ This is an advanced topic requiring the following prerequisites:
 
 - Familiarity with IDA
 
-- Windows kernel exploitation knowledge, including R/W primitives
+- Windows kernel exploitation knowledge.
 
 ## Tools Used
 
@@ -57,7 +57,7 @@ This project is for both pentesters and defenders to understand how attackers ca
 
 Tools exist already for example [EDRSandblast](https://github.com/wavestone-cdt/EDRSandblast) which is great that will do this and calculate offsets automaticaly, but this is designed to be small and on point for multiple reasons:
 
-- For everyone to be able to learn how technically bypassing EDR (File Callbacks) is done.
+- For everyone to be able to learn how technically bypassing EDR (File Filters Callbacks) is done.
 - For having the flexibility to create your own tool which make it pretty easier to bypass signature based detection.
 - For researchers to be able to play around the code and debug and reverse and maybe find something new.
 
