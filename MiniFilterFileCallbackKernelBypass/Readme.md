@@ -105,7 +105,7 @@ The frame will contains all the registered filters.
 
 <pre>
 lkd> x FLTMGR!FltGlobals
-<span style="color: green;">fffff800`35090740 FLTMGR!FltGlobals = <no type information></span>
+<mark>fffff800`35090740 FLTMGR!FltGlobals = <no type information></mark>
 lkd> dt FLTMGR!_GLOBALS fffff800`35090740
    +0x000 DebugFlags       : 0
    +0x008 DebugTraceFlags  : 0
@@ -119,8 +119,8 @@ lkd> dt FLTMGR!_GLOBALS fffff800`35090740
    +0x040 KtmTransactionManagerHandle : 0xffffffff`800001fc Void
    +0x048 TxVolKtmResourceManagerHandle : (null) 
    +0x050 TxVolKtmResourceManager : (null) 
-   <span style="color: green;">+0x058 FrameList        : _FLT_RESOURCE_LIST_HEAD
-                                    [+0x068] rList [Type: _LIST_ENTRY]</span>
+   <mark>+0x058 FrameList        : _FLT_RESOURCE_LIST_HEAD
+                                    [+0x068] rList [Type: _LIST_ENTRY]</mark>
 lkd> dqs fffff800`35090740 + 0x058 + 0x068 L2
 fffff800`35090800  ffffa801`6c078248
 fffff800`35090808  ffffa801`6c078248
@@ -136,7 +136,7 @@ First we need to subtract 0x08 from `ffffa8016c078248` to get to the the start o
 dt FLTMGR!_FLTP_FRAME 0xffffa8016c078240
     +0x008 Links : _LIST_ENTRY [ 0xfffff800`35090800 - 0xfffff800`35090800 ]
 	+0x048 RegisteredFilters : _FLT_RESOURCE_LIST_HEAD
-		<span style="color: green;">[+0x068] rList            [Type: _LIST_ENTRY]</span>
+		<mark>[+0x068] rList            [Type: _LIST_ENTRY]</mark>
 		[+0x078] rCount           : 0xc [Type: unsigned long]
 </pre>
 
@@ -144,14 +144,14 @@ And so the c code will loop through each filter and compare the name of the filt
 
 <pre>
 lkd> dqs 0xffffa8016c078240 + 0x048 + 0x068 L2
-ffffa801`6c0782f0  <span style="color: green;">ffffa801`6e76a020</span>
+ffffa801`6c0782f0  <mark>ffffa801`6e76a020</mark>
 ffffa801`6c0782f8  ffffa801`6c089530
 </pre>
 
 We need to substract 0x10 from the address that we will use from the link list `ffffa8016e76a020` => to get to the base address of the filter structure `_FLT_FILTER`
 
 <pre>
-dt _FLT_FILTER <span style="color: green;">ffffa801`6e76a010</span>
+dt _FLT_FILTER <mark>ffffa801`6e76a010</mark>
 	+0x038 Name             : _UNICODE_STRING "bindflt"
 		[+0x000] Length           : 0xe [Type: unsigned short]
 		[+0x002] MaximumLength    : 0xe [Type: unsigned short]
@@ -170,7 +170,7 @@ This will return the frame structure pointer of the filter we chose.
 
 <pre>
 lkd> dt _FLT_FILTER ffffa801`6e76a010
-    <span style="color: green;">+0x030 Frame            : 0xffffa801`6c078240 _FLTP_FRAME</span>
+    <mark>+0x030 Frame            : 0xffffa801`6c078240 _FLTP_FRAME</mark>
 </pre>
 
 The function will return `0xffffa8016c078240`
@@ -185,17 +185,17 @@ The purpose of this function is to gather all the pre and post operations of tha
 
 <pre>
 dt _FLT_FILTER ffffa801`6e76a010
-	   <span style="color: green;">+0x1a8 Operations       : 0xffffa801`6e76a2d0 _FLT_OPERATION_REGISTRATION</span>
+	   <mark>+0x1a8 Operations       : 0xffffa801`6e76a2d0 _FLT_OPERATION_REGISTRATION</mark>
 </pre>
 
 Next let's dump the operations structure `_FLT_OPERATION_REGISTRATION`
 
 <pre>
 dt FLTMGR!_FLT_OPERATION_REGISTRATION 0xffffa801`6e76a2d0
-   <span style="color: green;">+0x000 MajorFunction    : 0 ''</span>
+   <mark>+0x000 MajorFunction    : 0 ''</mark>
    +0x004 Flags            : 0
-   <span style="color: green;">+0x008 PreOperation     : 0xfffff800`39fd7830     _FLT_PREOP_CALLBACK_STATUS  bindflt!BfPreCreate+0
-   +0x010 PostOperation    : 0xfffff800`39fcf3b0     _FLT_POSTOP_CALLBACK_STATUS  bindflt!BfPostCreate+0</span>
+   <mark>+0x008 PreOperation     : 0xfffff800`39fd7830     _FLT_PREOP_CALLBACK_STATUS  bindflt!BfPreCreate+0
+   +0x010 PostOperation    : 0xfffff800`39fcf3b0     _FLT_POSTOP_CALLBACK_STATUS  bindflt!BfPostCreate+0</mark>
    +0x018 Reserved1        : (null) 
 </pre>
 
@@ -211,7 +211,7 @@ File Filters can be setup in a way to only be active and monitor I/O operations 
 
 <pre>
 dt FLTMGR!_FLTP_FRAME 0xffffa8016c078240
-		<span style="color: green;">+0x0c8 AttachedVolumes  : _FLT_RESOURCE_LIST_HEAD</span>
+		<mark>+0x0c8 AttachedVolumes  : _FLT_RESOURCE_LIST_HEAD</mark>
 			    [+0x000] rLock            : Unowned Resource [Type: _ERESOURCE]
 				[+0x068] rList            [Type: _LIST_ENTRY]
 				[+0x078] rCount           : 0x7 [Type: unsigned long]
@@ -223,7 +223,7 @@ Next the function will Loop through the `rList` list entries to get the volume s
 
 <pre>
 lkd> dqs 0xffffa8016c078240 + 0x0c8 + 0x068 L2
-ffffa801`6c078370  <span style="color: green;">ffffa801`6c427050</span>
+ffffa801`6c078370  <mark>ffffa801`6c427050</mark>
 ffffa801`6c078378  ffffa801`6df8d020
 </pre>
 
@@ -247,8 +247,8 @@ Each Volume will contains a list of callbacks, indexed by their Major Function +
 
 <pre>
 dt FLTMGR!_FLT_VOLUME ffffa801`6c427040
-	<span style="color: green;">+0x140 Callbacks        : _CALLBACK_CTRL
-	    [+0x000] OperationLists   [Type: _LIST_ENTRY [50]]</span>
+	<mark>+0x140 Callbacks        : _CALLBACK_CTRL
+	    [+0x000] OperationLists   [Type: _LIST_ENTRY [50]]</mark>
 		[+0x320] OperationFlags   [Type: _CALLBACK_NODE_FLAGS [50]
 </pre>
 
@@ -262,8 +262,8 @@ ffffa801`6c427180  ffffc20e`bfc9a7d0
 dt FLTMGR!_CALLBACK_NODE ffffc20e`bfc9a7d0
    +0x000 CallbackLinks    : _LIST_ENTRY
    +0x010 Instance         : Ptr64 _FLT_INSTANCE
-   <span style="color: green;">+0x018 PreOperation     : Ptr64     _FLT_PREOP_CALLBACK_STATUS 
-   +0x020 PostOperation    : Ptr64     _FLT_POSTOP_CALLBACK_STATUS </span>
+   <mark>+0x018 PreOperation     : Ptr64     _FLT_PREOP_CALLBACK_STATUS 
+   +0x020 PostOperation    : Ptr64     _FLT_POSTOP_CALLBACK_STATUS </mark>
    +0x018 GenerateFileName : Ptr64     long 
    +0x018 NormalizeNameComponent : Ptr64     long 
    +0x018 NormalizeNameComponentEx : Ptr64     long 

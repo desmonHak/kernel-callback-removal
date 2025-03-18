@@ -54,7 +54,7 @@ Based on previous research, we know that `nt!EtwThreatIntProvRegHandle` in the h
 
 <pre>
 lkd> dqs nt!EtwThreatIntProvRegHandle L1
-fffff806`904fe358  <span style="color: green;">ffff950e`64cff810</span>
+fffff806`904fe358  <mark>ffff950e`64cff810</mark>
 </pre>
 
 This handle, used in particular for writing events by the `EtwWrite` function, corresponds to a pointer to the `_ETW_REG_ENTRY` Structure.
@@ -64,7 +64,7 @@ lkd> dt _ETW_REG_ENTRY ffff950e`64cff810
 nt!_ETW_REG_ENTRY
    +0x000 RegList          : _LIST_ENTRY [ 0xffff950e`645c6718 - 0xffff950e`645c6718 ]
    +0x010 GroupRegList     : _LIST_ENTRY [ 0xffff950e`64cff820 - 0xffff950e`64cff820 ]
-   <span style="color: green;">+0x020 GuidEntry        : 0xffff950e`645c66e0 _ETW_GUID_ENTRY</span>
+   <mark>+0x020 GuidEntry        : 0xffff950e`645c66e0 _ETW_GUID_ENTRY</mark>
    +0x028 GroupEntry       : (null) 
    +0x030 ReplyQueue       : 0xfffff806`901fda7a _ETW_REPLY_QUEUE
    +0x030 ReplySlot        : [4] 0xfffff806`901fda7a _ETW_QUEUE_ENTRY
@@ -106,7 +106,7 @@ nt!_ETW_GUID_ENTRY
    +0x048 SecurityDescriptor : 0xffffc885`0d4d59a0 Void
    +0x050 LastEnable       : _ETW_LAST_ENABLE_INFO
    +0x050 MatchId          : 0x00000114`dcfa5555
-   <span style="color: green;">+0x060 ProviderEnableInfo : _TRACE_ENABLE_INFO</span>
+   <mark>+0x060 ProviderEnableInfo : _TRACE_ENABLE_INFO</mark>
    +0x080 EnableInfo       : [8] _TRACE_ENABLE_INFO
    +0x180 FilterData       : (null) 
    +0x188 SiloState        : 0xffff950e`64684000 _ETW_SILODRIVERSTATE
@@ -120,7 +120,7 @@ Within this object is the ProviderEnableInfo field (type _TRACE_ENABLE_INFO) tha
 <pre>
 lkd> dx -id 0,0,ffff950e685b2080 -r1 (*((ntkrnlmp!_TRACE_ENABLE_INFO *)0xffff950e645c6740))
 (*((ntkrnlmp!_TRACE_ENABLE_INFO *)0xffff950e645c6740))                 [Type: _TRACE_ENABLE_INFO]
-    <span style="color: green;">[+0x000] IsEnabled        : 0x1 [Type: unsigned long]</span>
+    <mark>[+0x000] IsEnabled        : 0x1 [Type: unsigned long]</mark>
     [+0x004] Level            : 0xff [Type: unsigned char]
     [+0x005] Reserved1        : 0x0 [Type: unsigned char]
     [+0x006] LoggerId         : 0x0 [Type: unsigned short]
@@ -142,7 +142,7 @@ First let's get the offset to the function from the nt base
 
 <pre>
 lkd> ? nt!EtwThreatIntProvRegHandle - nt
-Evaluate expression: 15721304 =  <span style="color: green;">00000000`00efe358</span>
+Evaluate expression: 15721304 =  <mark>00000000`00efe358</mark>
 </pre>
 
 Then copy the `ntoskrnl.exe` from `c:/windows/system32` to open it in IDA.
@@ -170,13 +170,13 @@ fffff806`8f880392 4155            push    r13
 fffff806`8f880394 4156            push    r14
 fffff806`8f880396 4157            push    r15
 fffff806`8f880398 4883ec70        sub     rsp,70h
-<span style="color: green;">fffff806`8f88039c 4c8b15b5dfc700  mov     r10,qword ptr [nt!EtwThreatIntProvRegHandle (fffff806`904fe358)]</span>
-fffff806`8f8803a3 <span style="color: red;">458be9</span>          mov     r13d,r9d
-fffff806`8f8803a6 <span style="color: red;">488be9</span>          mov     rbp,rcx
+<mark>fffff806`8f88039c 4c8b15b5dfc700  mov     r10,qword ptr [nt!EtwThreatIntProvRegHandle (fffff806`904fe358)]</mark>
+fffff806`8f8803a3 <mark>458be9</mark>          mov     r13d,r9d
+fffff806`8f8803a6 <mark>488be9</mark>          mov     rbp,rcx
 fffff806`8f8803a9 4d85d2          test    r10,r10
 </pre>
 
-and so now, we need to do a binary search to find the handle, and for the binary search we can use the opcode highlighed in red and start the search for the exported function `nt!KeInsertQueueApc`.
+and so now, we need to do a binary search to find the handle, and for the binary search we can use the opcode highlighed (458be9 and 488be9) and start the search for the exported function `nt!KeInsertQueueApc`.
 
 After getting the address of the handle, we just use our Read / Write primitive to enumerate the field and overwrite it.
 

