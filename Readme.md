@@ -43,7 +43,9 @@ This project is for both pentesters and defenders to understand how attackers ca
 
 ## Tested on
 Host Name:                     WIN11
+
 OS Name:                       Microsoft Windows 11 Pro
+
 OS Version:                    10.0.26100 N/A Build 26100
 
 ### Disclaimer
