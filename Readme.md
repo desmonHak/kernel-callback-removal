@@ -1,5 +1,9 @@
 # Kernel Callbacks Removal (Bypassing EDR Detections)
 
+## Warning
+
+Even though you can download the binaries from the `releases`, you have to make sure that the offsets and the binary search opcodes done is the same on your windows version or you will get a **BLUE SCREEN OF DEATH**
+
 ## Prerequisistes
 
 This is an advanced topic requiring the following prerequisites:
@@ -47,10 +51,6 @@ Host Name:                     WIN11
 OS Name:                       Microsoft Windows 11 Pro
 
 OS Version:                    10.0.26100 N/A Build 26100
-
-## Warning
-
-Even though you can download the binaries from the `releases`, you have to make sure that the offsets and the binary search opcodes done is the same on your windows version or you will get a **BLUE SCREEN OF DEATH**
 
 ### Disclaimer
 This project is for **educational purposes only**. Unauthorized use of this tool in production or against systems without explicit permission is strictly prohibited.
