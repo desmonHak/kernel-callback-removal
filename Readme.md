@@ -1,4 +1,4 @@
-# Kernel Callbacks Removal
+# Kernel Callbacks Removal (Bypassing EDR Detections)
 
 ## Prerequisistes
 
