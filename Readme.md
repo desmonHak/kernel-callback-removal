@@ -5,7 +5,7 @@
 Even though you can download the binaries from the `releases`, you have to make sure that the offsets and the binary search opcodes done is the same on your windows version or you will get a **BLUE SCREEN OF DEATH**
 
 ## New Undisclosed Technique 
-I discovered an alternative method that bypasses kernel-level verification by overwriting the callback function inside the Callback entry itself with a KCFG-compliant function that simply returns. This evades detections that monitor changes at the callback array level (For Kernel Notify Routines Callbacks).
+I discovered an alternative method that bypasses kernel-level verification by overwriting the callback function inside the Callback entry itself with a KCFG-compliant function that simply returns. This evades detections that monitor changes at the callback array level `(For Kernel Notify Routines Callbacks)`.
 
 ## Prerequisistes
 
