@@ -1,6 +1,11 @@
 # Kernel Notify Callbacks Removal
 
-CheekyBlinder is a project developed 5 years ago for removing kernel callbacks related to process creation, image load, thread creation, and registry modifications by https://github.com/br-sn.
+
+CheekyBlinder is a project that was developed developed 5 years ago for removing kernel callbacks related to process creation, image load, thread creation, and registry modifications by https://github.com/br-sn.
+
+## Warning
+
+Even though you can download the binaries from the `releases`, you have to make sure that the offsets and the binary search opcodes done is the same on your windows version or you will get a **BLUE SCREEN OF DEATH**
 
 ## Major Updates
 
@@ -8,7 +13,7 @@ CheekyBlinder is a project developed 5 years ago for removing kernel callbacks r
 
 - Introduced a stealthier method for bypassing kernel callbacks (not publicly disclosed yet, at least not as far as i know).
 
-- Completed the registry callback removal, which was previously non-functional.
+- Completed the registry callback removal, which was previously non-completed.
 
 - Added step-by-step guidance on modifying the exploit for future or different Windows versions.
 

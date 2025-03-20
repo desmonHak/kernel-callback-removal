@@ -1,5 +1,9 @@
 # Network Callout Kernel Callbacks Bypass
 
+## Warning
+
+Even though you can download the binaries from the `releases`, you have to make sure that the offsets and the binary search opcodes done is the same on your windows version or you will get a **BLUE SCREEN OF DEATH**
+
 ## Prerequisistes
 
 This is an advanced topic requiring the following prerequisites:
