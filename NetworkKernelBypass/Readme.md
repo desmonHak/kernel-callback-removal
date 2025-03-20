@@ -189,11 +189,11 @@ fffff800`365780bd 0f57c0          xorps   xmm0,xmm0
 </pre>
 
 `NETIO!FeInitCalloutTable` is not an exported function, so we cannot get the address of the function directly in our c code.
-We need to start the byte search using a function that is exported and close to `NETIO!FeInitCalloutTable`.
+We need to start the binary search using a function that is exported and close to `NETIO!FeInitCalloutTable`.
 
 the functions needs to be exported to be able to use `GetProcAddress` and `GetModuleHandle` on them and get the function address.
 
-So To find the closest exported functions (start and end) to use in our code as a starting point for the byte search, we can use IDA.
+So To find the closest exported functions (start and end) to use in our code as a starting point for the binary search, we can use IDA.
 
 First let's get the offset to the function from the nt base
 
@@ -216,7 +216,7 @@ Note: It will take some time for the addresses in the export table to be refresh
 
 And then you have to pick 2 functions where `000580b0` which is the address of `NETIO!FeInitCalloutTable` is between them.
 
-As you can, from the screenshot `FeGetWfpGlobalPtr` and `KfdDeRefCallout` are the start and end functions that i will be using as `NETIO!FeInitCalloutTable` falls in between, so i can use `FeGetWfpGlobalPtr` as the start of the byte search.
+As you can, from the screenshot `FeGetWfpGlobalPtr` and `KfdDeRefCallout` are the start and end functions that i will be using as `NETIO!FeInitCalloutTable` falls in between, so i can use `FeGetWfpGlobalPtr` as the start of the binary search.
 
 ![Export Table](./screenshots/ExportTable.png)
 
@@ -254,11 +254,34 @@ lkd> dqs ffff8088`65705010 + 0x198 + 0x08 L1
 ffff8088`657051b0  ffff8088`6819a000
 </pre>
 
+<pre>
+const uint8_t patterngWfpGlobal[] = { 0x4C, 0x8B, 0x05, 0x49, 0x81, 0xC0 };
+</pre>
+
 we need to pick bytes that are static and doesnt change between reboot. I highlighed what I will be searching for in my code (4c8b05 and 4981c0). and after finding the address in our code. we will get `fffff80626a980d1`.
 
 After that we can calculate the global structure address and the offset in our code.
 
-I used as well the function `InitDefaultCallout` to get the structure size of each network callout entry (0x60 in our case) using binary search by searching for `b9` and reading the structure size after the address is found.
+Next we will use another binary search to find the function address of `InitDefaultCallout`, because we will use to extract the callout structure size dynamicaly.
+
+<pre>
+lkd> u
+NETIO!FeInitCalloutTable+0x4b:
+fffff807`211e80fb 488b89a0010000  mov     rcx,qword ptr [rcx+1A0h]
+fffff807`211e8102 e839cc0100      call    NETIO!_memset_spec_ermsb (fffff807`21204d40)
+fffff807`211e8107 488b05728a0300  mov     rax,qword ptr [NETIO!gWfpGlobal (fffff807`21220b80)]
+fffff807`211e810e c7809801000000040000 mov dword ptr [rax+198h],400h
+<mark>fffff807`211e8118 e827000000      call    NETIO!InitDefaultCallout (fffff807`211e8144)</mark>
+fffff807`211e811d <mark>488bd8</mark>          mov     rbx,rax
+fffff807`211e8120 <mark>4885db</mark>          test    rbx,rbx
+fffff807`211e8123 740f            je      NETIO!FeInitCalloutTable+0x84 (fffff807`211e8134)
+</pre>
+
+<pre>
+const uint8_t patterngInitDefaultCallout[] = { 0x48, 0x8B, 0xd8, 0x48, 0x85, 0xdb };
+</pre>
+
+I will use the function `InitDefaultCallout` to get the structure size of each network callout entry (0x60 in our case) using binary search by searching for `b9` and reading the structure size after the address is found.
 
 <pre>
 lkd> u NETIO!InitDefaultCallout
@@ -269,6 +292,10 @@ fffff806`26a9814a 4c8d05ff860300  lea     r8,[NETIO!gFeCallout (fffff806`26ad085
 fffff806`26a98151 ba57667043      mov     edx,43706657h
 fffff806`26a98156 <mark>b9</mark>60000000      mov     ecx,60h
 fffff806`26a9815b e8a0befbff      call    NETIO!WfpPoolAllocNonPaged (fffff806`26a54000)
+</pre>
+
+<pre>
+const uint8_t patterngCalloutStructureSize[] = { 0xb9 };
 </pre>
 
 At this point we were able to extract
@@ -317,6 +344,10 @@ fffff801`63968175 e8c6cb0100      call    NETIO!_memset_spec_ermsb (fffff801`639
 fffff801`6396817a 488b0dcf860300  mov     rcx,qword ptr [NETIO!gFeCallout (fffff801`639a0850)]
 fffff801`63968181 <mark>488d05</mark>28ebfdff  lea     rax,[NETIO!FeDefaultClassifyCallback (fffff801`63946cb0)]
 fffff801`63968188 <mark>c70104</mark>000000    mov     dword ptr [rcx],4
+</pre>
+
+<pre>
+const uint8_t patterngFeDefaultClassifyCallback[] = { 0x48, 0x8d, 0x05, 0xc7, 0x01 };
 </pre>
 
 `InitDefaultCallout` is not an exported function, so we need to find first an exported function close to `InitDefaultCallout` for our binary search.

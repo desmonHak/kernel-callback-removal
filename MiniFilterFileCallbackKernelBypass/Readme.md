@@ -99,7 +99,13 @@ fffff800`350c9104 4c8b154d10fdff  mov     r10,qword ptr [FLTMGR!_imp_ExAcquireFa
 fffff800`350c910b e820da146e      call    nt!ExAcquireFastResourceShared (fffff800`a3216b30)
 </pre>
 
+<pre>
+const uint8_t patternFltGlobals[] = { 0x48, 0x8d, 0x0d, 0x58 };
+</pre>
+
 So the function `ResolveFltmgrGlobals` will resolve the address of `FLTMGR!FltGlobals` by loading `FLTMGR.sys` to the usermode process and using a binary search, by searching for `lea rcx` opcodes and calculate the offset of `FLTMGR!FltGlobals` and use that on the real driver base address of `FLTMGR.sys` to get the kernel address of `FLTMGR!FltGlobals` .
+
+**Note:** we need to subtract 0x58 from the address we will get because as you can see from the snipped above, what we will get is `FLTMGR!FltGlobals+0x58`.
 
 ### GetFilterByName Function
 

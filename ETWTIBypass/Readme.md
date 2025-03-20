@@ -180,6 +180,10 @@ fffff806`8f8803a6 <mark>488be9</mark>          mov     rbp,rcx
 fffff806`8f8803a9 4d85d2          test    r10,r10
 </pre>
 
+<pre>
+const uint8_t patternEtwThreatIntProvRegHandle[] = { 0x45, 0x8b, 0xe9, 0x48, 0x8b, 0xe9 };
+</pre>
+
 and so now, we need to do a binary search to find the handle, and for the binary search we can use the opcode highlighed (458be9 and 488be9) and start the search for the exported function `nt!KeInsertQueueApc`.
 
 After getting the address of the handle, we just use our Read / Write primitive to enumerate the field and overwrite it.
