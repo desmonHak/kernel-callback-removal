@@ -62,8 +62,18 @@ PVOID FltManager::ResolveFltmgrGlobals(LPVOID lpkFltMgrBase)
 	DWORD distance = 0;
 	LPVOID pFltGlobals = NULL;
 
+	//FLTMGR!FltEnumerateFilters + 0x81:
+	//fffff800`350c90e1 e87a59316e      call    nt!ExInitializeFastOwnerEntry(fffff800`a33dea60)
+	//fffff800`350c90e6 4c8b157310fdff  mov     r10, qword ptr[FLTMGR!_imp_KeEnterCriticalRegion(fffff800`3509a160)]
+	//fffff800`350c90ed e8fe23326e      call    nt!KeEnterCriticalRegion(fffff800`a33eb4f0)
+	//fffff800`350c90f2 41b001          mov     r8b, 1
+	//fffff800`350c90f5 488d942480000000 lea     rdx, [rsp + 80h]
+	//fffff800`350c90fd 488d0d9476fcff  lea     rcx, [FLTMGR!FltGlobals + 0x58 (fffff800`35090798)]
+	//fffff800`350c9104 4c8b154d10fdff  mov     r10, qword ptr[FLTMGR!_imp_ExAcquireFastResourceShared(fffff800`3509a158)]
+	//fffff800`350c910b e820da146e      call    nt!ExAcquireFastResourceShared(fffff800`a3216b30)
+	
 	while (StartSearch <= EndSearch) {
-		if ((((PBYTE)StartSearch)[0] == 0x48) && (((PBYTE)StartSearch)[1] == 0x8d) && (((PBYTE)StartSearch)[2] == 0x0d)) {
+		if ((((PBYTE)StartSearch)[0] == patternFltGlobals[0]) && (((PBYTE)StartSearch)[1] == patternFltGlobals[1]) && (((PBYTE)StartSearch)[2] == patternFltGlobals[2])) {
 			distance = *(PDWORD)((DWORD_PTR)StartSearch + 3);
 			pFltGlobals = (LPVOID)((DWORD_PTR)StartSearch + distance + 7);
 			break;
@@ -75,7 +85,7 @@ PVOID FltManager::ResolveFltmgrGlobals(LPVOID lpkFltMgrBase)
 	// Calculate offset
 	DWORD Offset = (DWORD)pFltGlobals - (DWORD)hFltmgr;
 
-	return (LPVOID) ((DWORD64) lpkFltMgrBase + (DWORD64) Offset - 0x58);
+	return (LPVOID) ((DWORD64) lpkFltMgrBase + (DWORD64) Offset - patternFltGlobals[3]);
 }
 
 FltManager::FltManager(MemHandler* objMemHandlerArg)

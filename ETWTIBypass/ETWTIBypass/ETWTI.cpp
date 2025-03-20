@@ -73,7 +73,7 @@ BOOL ETWTI::EnumerateETW(BOOLEAN REMOVE, wchar_t* whattodo) {
 	printf("StartSearch %llx\n", StartSearch);
 	 
 	while (StartSearch <= EndSearch) {
-		if ((((PBYTE)StartSearch)[0] == 0x45) && (((PBYTE)StartSearch)[1] == 0x8b) && (((PBYTE)StartSearch)[2] == 0xe9) && (((PBYTE)StartSearch)[3] == 0x48) && (((PBYTE)StartSearch)[4] == 0x8b) && (((PBYTE)StartSearch)[5] == 0xe9)) {
+		if ((((PBYTE)StartSearch)[0] == patternEtwThreatIntProvRegHandle[0]) && (((PBYTE)StartSearch)[1] == patternEtwThreatIntProvRegHandle[1]) && (((PBYTE)StartSearch)[2] == patternEtwThreatIntProvRegHandle[2]) && (((PBYTE)StartSearch)[3] == patternEtwThreatIntProvRegHandle[3]) && (((PBYTE)StartSearch)[4] == patternEtwThreatIntProvRegHandle[4]) && (((PBYTE)StartSearch)[5] == patternEtwThreatIntProvRegHandle[5])) {
 			distance = *(PDWORD)((DWORD_PTR)StartSearch - 4);
 			pEtwThreat = (LPVOID)((DWORD_PTR)StartSearch + distance); 
 			break;

@@ -1,6 +1,8 @@
 #include "netUtil.h"
 #include <tchar.h>
 
+
+
 PVOID NetworkManager::ResolveDriverBase(const wchar_t* strDriverName)
 {
 	DWORD szBuffer = 0x2000;
@@ -157,8 +159,10 @@ BOOL NetworkManager::EnumerateNetworkFilters(BOOLEAN REMOVE, wchar_t* DriverName
 	//	fffff802`3e575e6e 0f118098010000  movups  xmmword ptr[rax + 198h], xmm0
 	//	fffff802`3e575e75 4c8b05c4970500  mov     r8, qword ptr[NETIO!gWfpGlobal(fffff802`3e5cf640)] ; search for this
 	//	fffff802`3e575e7c 4981c0a0010000  add     r8, 1A0h ; as well search for this
+	//  BYTE patterngWfpGlobal[] = { 0x4C, 0x8B, 0x05, 0x49, 0x81, 0xC0 }; change them in netUtil.h
+
 	while (StartSearch <= EndSearch) {
-		if ((((PBYTE)StartSearch)[0] == 0x4c) && (((PBYTE)StartSearch)[1] == 0x8b) && (((PBYTE)StartSearch)[2] == 0x05) && (((PBYTE)StartSearch)[7] == 0x49) && (((PBYTE)StartSearch)[8] == 0x81) && (((PBYTE)StartSearch)[9] == 0xc0)) {
+		if ((((PBYTE)StartSearch)[0] == patterngWfpGlobal[0]) && (((PBYTE)StartSearch)[1] == patterngWfpGlobal[1]) && (((PBYTE)StartSearch)[2] == patterngWfpGlobal[2]) && (((PBYTE)StartSearch)[7] == patterngWfpGlobal[3]) && (((PBYTE)StartSearch)[8] == patterngWfpGlobal[4]) && (((PBYTE)StartSearch)[9] == patterngWfpGlobal[5])) {
 			distance = *(PDWORD)((DWORD_PTR)StartSearch + 3);
 			pgWfpGlobal = (LPVOID)((DWORD_PTR)StartSearch + 7 + distance);
 			break;
@@ -182,7 +186,7 @@ BOOL NetworkManager::EnumerateNetworkFilters(BOOLEAN REMOVE, wchar_t* DriverName
 	// fffff806`3bb15ec1 488bd8          mov     rbx, rax
 	// fffff806`3bb15ec4 4885db          test    rbx, rbx
 	while (StartSearch <= EndSearch) {
-		if ((((PBYTE)StartSearch)[0] == 0x48) && (((PBYTE)StartSearch)[1] == 0x8b) && (((PBYTE)StartSearch)[2] == 0xd8) && (((PBYTE)StartSearch)[3] == 0x48) && (((PBYTE)StartSearch)[4] == 0x85) && (((PBYTE)StartSearch)[5] == 0xdb)) {
+		if ((((PBYTE)StartSearch)[0] == patterngInitDefaultCallout[0]) && (((PBYTE)StartSearch)[1] == patterngInitDefaultCallout[1]) && (((PBYTE)StartSearch)[2] == patterngInitDefaultCallout[2]) && (((PBYTE)StartSearch)[3] == patterngInitDefaultCallout[3]) && (((PBYTE)StartSearch)[4] == patterngInitDefaultCallout[4]) && (((PBYTE)StartSearch)[5] == patterngInitDefaultCallout[5])) {
 			distance = *(PDWORD)((DWORD_PTR)StartSearch - 4);
 			pInitDefaultCallout = (LPVOID)((DWORD_PTR)StartSearch + distance); 
 			break;
@@ -204,7 +208,7 @@ BOOL NetworkManager::EnumerateNetworkFilters(BOOLEAN REMOVE, wchar_t* DriverName
 	StartSearch = pInitDefaultCallout;
 	BYTE STRUCTURESIZE;
 	while (true) {
-		if ((((PBYTE)StartSearch)[0] == 0xb9)) {
+		if ((((PBYTE)StartSearch)[0] == patterngCalloutStructureSize[0])) {
 			STRUCTURESIZE = *(PDWORD)((DWORD_PTR)StartSearch + 1); //Get the distance from the call instruction
 			break;
 		}
@@ -255,7 +259,7 @@ BOOL NetworkManager::EnumerateNetworkFilters(BOOLEAN REMOVE, wchar_t* DriverName
 		// fffff800`82f75f21 488d0578950000  lea     rax, [NETIO!FeDefaultClassifyCallback(fffff800`82f7f4a0)]
 		// fffff800`82f75f28 c70104000000    mov     dword ptr[rcx], 4
 		while (StartSearch <= EndSearch) {
-			if ((((PBYTE)StartSearch)[0] == 0x48) && (((PBYTE)StartSearch)[1] == 0x8d) && (((PBYTE)StartSearch)[2] == 0x05) && (((PBYTE)StartSearch)[7] == 0xc7) && (((PBYTE)StartSearch)[8] == 0x01)) {
+			if ((((PBYTE)StartSearch)[0] == patterngFeDefaultClassifyCallback[0]) && (((PBYTE)StartSearch)[1] == patterngFeDefaultClassifyCallback[1]) && (((PBYTE)StartSearch)[2] == patterngFeDefaultClassifyCallback[2]) && (((PBYTE)StartSearch)[7] == patterngFeDefaultClassifyCallback[3]) && (((PBYTE)StartSearch)[8] == patterngFeDefaultClassifyCallback[4])) {
 				distance = *(PDWORD)((DWORD_PTR)StartSearch + 3);
 				pFeDefaultClassifyCallback = (LPVOID)((DWORD_PTR)StartSearch + 7 + distance);
 				break;
@@ -271,7 +275,7 @@ BOOL NetworkManager::EnumerateNetworkFilters(BOOLEAN REMOVE, wchar_t* DriverName
 	for (DWORD i = 0x00; i < numberofentries; ++i) {
 		WFP_STRUCT* wfpstucture = new WFP_STRUCT();
 		b = this->objMemHandler->VirtualRead(
-			(DWORD64)pentries + CALLOUT_STRUCTURE_SIZE * i,
+			(DWORD64)pentries + STRUCTURESIZE * i,
 			wfpstucture,
 			sizeof(WFP_STRUCT)
 		);
@@ -279,7 +283,7 @@ BOOL NetworkManager::EnumerateNetworkFilters(BOOLEAN REMOVE, wchar_t* DriverName
 
 		if (wfpstucture->secondDword == 0x01) {
 			printf("-------------------------------------------------------------------------\n");
-			printf("Entry Number: %d, WFP stucture entry pointer: %llx\n", i, (DWORD64)pentries + CALLOUT_STRUCTURE_SIZE * i);
+			printf("Entry Number: %d, WFP stucture entry pointer: %llx\n", i, (DWORD64)pentries + STRUCTURESIZE * i);
 			if (wfpstucture->classifyFn != 0) {
 				printf("[+] classifyFn: ");
 				TCHAR* DriverOuput = FindDriver(wfpstucture->classifyFn);
@@ -287,10 +291,10 @@ BOOL NetworkManager::EnumerateNetworkFilters(BOOLEAN REMOVE, wchar_t* DriverName
 				wchar_t* driverName = ExtractDriverName(DriverOuput);
 				if (REMOVE == true) {
 					if (DriverName != NULL && wcscmp(DriverName, driverName) == 0) {
-						patchCallbackMap[(DWORD64)pentries + CALLOUT_STRUCTURE_SIZE * i + 0x10] = std::make_pair((DWORD64)wfpstucture->classifyFn, (DWORD64)this->lpnetioBase + FeDefaultClassifyCallback_offset);
+						patchCallbackMap[(DWORD64)pentries + STRUCTURESIZE * i + 0x10] = std::make_pair((DWORD64)wfpstucture->classifyFn, (DWORD64)this->lpnetioBase + FeDefaultClassifyCallback_offset);
 
 						b = this->objMemHandler->WriteMemoryDWORD64(
-							(DWORD64) pentries + CALLOUT_STRUCTURE_SIZE * i + 0x10,
+							(DWORD64) pentries + STRUCTURESIZE * i + 0x10,
 							(DWORD64) this->lpnetioBase + FeDefaultClassifyCallback_offset
 						);
 						if (!b) return FALSE;
@@ -298,9 +302,9 @@ BOOL NetworkManager::EnumerateNetworkFilters(BOOLEAN REMOVE, wchar_t* DriverName
 						numPatched++;
 					}
 					else if (ADDRESS != NULL && ADDRESS == wfpstucture->classifyFn) {
-						patchCallbackMap[(DWORD64)pentries + CALLOUT_STRUCTURE_SIZE * i + 0x10] = std::make_pair((DWORD64)wfpstucture->classifyFn, (DWORD64)this->lpnetioBase + FeDefaultClassifyCallback_offset);
+						patchCallbackMap[(DWORD64)pentries + STRUCTURESIZE * i + 0x10] = std::make_pair((DWORD64)wfpstucture->classifyFn, (DWORD64)this->lpnetioBase + FeDefaultClassifyCallback_offset);
 						b = this->objMemHandler->WriteMemoryDWORD64(
-							(DWORD64)pentries + CALLOUT_STRUCTURE_SIZE * i + 0x10,
+							(DWORD64)pentries + STRUCTURESIZE * i + 0x10,
 							(DWORD64)this->lpnetioBase + FeDefaultClassifyCallback_offset
 						);
 						if (!b) return FALSE;
@@ -344,10 +348,10 @@ BOOL NetworkManager::EnumerateNetworkFilters(BOOLEAN REMOVE, wchar_t* DriverName
 				wchar_t* driverName = ExtractDriverName(DriverOuput);
 				if (REMOVE == true) {
 					if (DriverName != NULL && wcscmp(DriverName, driverName) == 0) {
-						patchCallbackMap[(DWORD64)pentries + CALLOUT_STRUCTURE_SIZE * i + 0x28] = std::make_pair((DWORD64)wfpstucture->classifyFn2, (DWORD64)this->lpnetioBase + FeDefaultClassifyCallback_offset);
+						patchCallbackMap[(DWORD64)pentries + STRUCTURESIZE * i + 0x28] = std::make_pair((DWORD64)wfpstucture->classifyFn2, (DWORD64)this->lpnetioBase + FeDefaultClassifyCallback_offset);
 
 						b = this->objMemHandler->WriteMemoryDWORD64(
-							(DWORD64)pentries + CALLOUT_STRUCTURE_SIZE * i + 0x28,
+							(DWORD64)pentries + STRUCTURESIZE * i + 0x28,
 							(DWORD64)this->lpnetioBase + FeDefaultClassifyCallback_offset
 						);
 						if (!b) return FALSE;
@@ -355,10 +359,10 @@ BOOL NetworkManager::EnumerateNetworkFilters(BOOLEAN REMOVE, wchar_t* DriverName
 						numPatched++;
 					}
 					else if (ADDRESS != NULL && ADDRESS == wfpstucture->classifyFn2) {
-						patchCallbackMap[(DWORD64)pentries + CALLOUT_STRUCTURE_SIZE * i + 0x28] = std::make_pair((DWORD64)wfpstucture->classifyFn2, (DWORD64)this->lpnetioBase + FeDefaultClassifyCallback_offset);
+						patchCallbackMap[(DWORD64)pentries + STRUCTURESIZE * i + 0x28] = std::make_pair((DWORD64)wfpstucture->classifyFn2, (DWORD64)this->lpnetioBase + FeDefaultClassifyCallback_offset);
 
 						b = this->objMemHandler->WriteMemoryDWORD64(
-							(DWORD64)pentries + CALLOUT_STRUCTURE_SIZE * i + 0x28,
+							(DWORD64)pentries + STRUCTURESIZE * i + 0x28,
 							(DWORD64)this->lpnetioBase + FeDefaultClassifyCallback_offset
 						);
 						if (!b) return FALSE;

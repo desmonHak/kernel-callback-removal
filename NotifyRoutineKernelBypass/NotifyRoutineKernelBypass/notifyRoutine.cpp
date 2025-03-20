@@ -130,27 +130,6 @@ BOOL notifyRoutine::Restore() {
 	return b;
 }
 
-struct Offsets getVersionOffsets() {
-	wchar_t value[255] = { 0x00 };
-	DWORD BufferSize = 255;
-	RegGetValue(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"ReleaseId", RRF_RT_REG_SZ, NULL, &value, &BufferSize);
-	wprintf(L"[+] Windows Version %s Found\n", value);
-	auto winVer = _wtoi(value);
-	switch (winVer) {
-		//case 1903:
-	case 1909:
-		return { 0x8b48cd0349c03345, 0xe8d78b48d90c8d48, 0xe8cd8b48f92c8d48, 0x4024448948f88b48 };
-	case 2004:
-		return { 0x8b48cd0349c03345, 0xe8d78b48d90c8d48, 0xe8cd8b48f92c8d48, 0x4024448948f88b48 };
-	case 2009:
-		return { 0x7340fe8341f63345, 0x8d48d68b48c03345, 0x48d90c8d48c03345, 0x4024448948f88b48 };
-	default:
-		wprintf(L"[!] Version Offsets Not Found!\n");
-
-	}
-
-}
-
 TCHAR* notifyRoutine::FindDriver(DWORD64 address) {
 
 	LPVOID drivers[1024];
