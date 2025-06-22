@@ -7,8 +7,6 @@ CheekyBlinder es un proyecto desarrollado hace 5 años para eliminar las llamada
 
 Aunque puedes descargar los binarios de los `releases`, tienes que asegurarte de que los offsets y los opcodes de busqueda de binarios realizados son los mismos en tu version de windows o obtendras una **PANTALLA AZUL DE MUERTE**.
 
-Traducción realizada con la versión gratuita del traductor DeepL.com
-
 ## Principales actualizaciones
 
 - Actualizado el exploit para que funcione en las últimas versiones de Windows.
